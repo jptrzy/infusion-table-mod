@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "infusion_table",
+  "version": "${version}",
+
+  "name": "Infusion Table",
+  "description": "",
+  "authors": [
+    "jptrzy"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+
+  "license": "gpl-3.0",
+  "icon": "assets/infusion_table/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.jptrzy.infusion.table.Main"
+    ],
+    "client": [
+      "net.jptrzy.infusion.table.Client"
+    ]
+  },
+  "mixins": [],
+  
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.17.x",
+    "java": ">=16"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

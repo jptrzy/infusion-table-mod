@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "infusion_table:block/infusion_table" }
+  }
+}
