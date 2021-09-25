@@ -44,9 +44,13 @@ public class InfusionTableBlock extends Block implements BlockEntityProvider {
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.isOf(newState.getBlock())) {
-            InfusionTableEntity blockEntity = (InfusionTableEntity) world.getBlockEntity(pos);
-            blockEntity.onBreak(state, world, pos, null);
+            ((InfusionTableEntity) world.getBlockEntity(pos)).onBreak(state, world, pos, null);
         }
+    }
+
+    @Override
+    public void onBlockBreakStart(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+        ((InfusionTableEntity) world.getBlockEntity(pos)).onBreak(state, world, pos, player);
     }
 
     @Nullable
