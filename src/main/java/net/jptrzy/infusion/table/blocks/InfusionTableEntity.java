@@ -6,27 +6,25 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Supplier;
 
 public class InfusionTableEntity extends BlockEntity implements BlockEntityClientSerializable {
@@ -35,14 +33,15 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
     private ItemStack book = new ItemStack(Items.AIR);
 
     private float bookOpenAngle = 0F;
+    private float bookAngle = 0F;
 
     /*
-    0 - empty
-    1 - with book
-    2 - with item in animation
-    3 - with item
+    0 - empty | passive
+    1 - with book | passive
+    2 - with item in animation or without item in reverse animation
+    3 - with item | passive
     4 - on fire in animation
-    5 - enchanted book
+    5 - enchanted book | passive
     */
     private int state = 0;
 
@@ -53,12 +52,10 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
     }
 
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        //Main.LOGGER.warn(player.getStackInHand(hand).toString());
-
         if(!world.isClient()) {
             ItemStack item = player.getStackInHand(hand);
             ItemStack copy;
-            if (this.book.isEmpty() && item.isOf(Items.BOOK) && !item.hasEnchantments()) {
+            if (this.state == 0 && item.isOf(Items.BOOK) && !item.hasEnchantments()) {
                 copy = item.copy();
                 copy.setCount(1);
                 this.book = copy;
@@ -66,7 +63,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                 this.bookOpenAngle = 0;
                 this.state = 1;
                 this.sync();
-            } else if (!this.book.isEmpty() && this.item.isEmpty() && item.hasEnchantments() && !item.isOf(Items.BOOK) && !item.isOf(Items.ENCHANTED_BOOK)) {
+            } else if (this.state == 1 && item.hasEnchantments() && !item.isOf(Items.BOOK) && !item.isOf(Items.ENCHANTED_BOOK)) {
                 copy = item.copy();
                 copy.setCount(1);
                 this.item = copy;
@@ -75,6 +72,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                 this.sync();
             }else if(this.state == 3 && item.isOf(Items.FLINT_AND_STEEL)){
                 this.state = 4;
+                this.sync();
             }
         }
         return ActionResult.SUCCESS;
@@ -87,31 +85,29 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
     public void onBreak(@Nullable BlockState state, World world, BlockPos pos, @Nullable PlayerEntity player) {
         if (!world.isClient()) {
             if (player == null) {
-                Main.LOGGER.warn("BREAK");
                 if(!this.book.isEmpty()) {
                     dropStack(world, pos, this.book);
                     this.book = new ItemStack(Items.AIR);
 
-                    if (!this.item.isEmpty()) {
+                    if (!this.item.isEmpty() && this.state != 5) {
                         dropStack(world, pos, this.item);
                         this.item = new ItemStack(Items.AIR);
                     }
+                    cleanUp(world);
                 }
                 this.sync();
             } else {
-                Main.LOGGER.warn("USE BREAK");
-
                 if (this.state == 3) {
                     dropStack(world, pos, this.item);
                     this.item = new ItemStack(Items.AIR);
-                    this.state = 1;
+                    this.state = 2;
                     this.sync();
                 } else if (this.state == 1 || this.state == 5) {
                     dropStack(world, pos, this.book);
                     this.book = new ItemStack(Items.AIR);
                     this.state = 0;
                     if(this.state == 5){
-                        this.item = new ItemStack(Items.AIR);
+                        cleanUp(world);
                     }
                     this.sync();
                 }
@@ -136,47 +132,65 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, InfusionTableEntity entity) {
-        Main.LOGGER.warn("tick");
-        Main.LOGGER.warn(entity.state);
-        Main.LOGGER.warn(entity.bookOpenAngle);
-        if(entity.state == 1 && entity.bookOpenAngle > 0F){
-            entity.bookOpenAngle -= 0.1F;
-        }else if(entity.state == 2){
-            if(entity.bookOpenAngle >= 1) {
-                entity.state = 3;
-                if(!world.isClient()){
-                    entity.sync();
-                }
-            }else{
-                entity.bookOpenAngle += 0.1F;
-            }
-        }else if(entity.state == 4) {
-            if(entity.time > 20){
-                if(entity.bookOpenAngle > 0F) {
-                    entity.bookOpenAngle -= 0.1F;
+
+        PlayerEntity playerEntity = world.getClosestPlayer((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, 3.0D, false);
+        if (playerEntity != null) {
+            double d = playerEntity.getX() - ((double) pos.getX() + 0.5D);
+            double e = playerEntity.getZ() - ((double) pos.getZ() + 0.5D);
+            entity.bookAngle = (float) MathHelper.atan2(e, d);
+        }
+
+        switch (entity.state) {
+            case 2:
+                if(entity.item.isEmpty()){
+                    if(entity.bookOpenAngle > 0F) {
+                        entity.bookOpenAngle -= 0.1F;
+                    }else if(!world.isClient()){
+                        entity.bookOpenAngle = 0;
+                        entity.state = 1;
+                        entity.sync();
+                    }
                 }else{
-                    if(!world.isClient()){
-
-                        entity.state = 5;
-                        entity.time = 0;
-
-
-
-                        Map<Enchantment, Integer> list =  EnchantmentHelper.fromNbt(entity.item.getEnchantments());
-                        for ( Map.Entry<Enchantment, Integer> entry : list.entrySet() ) {
-                            entity.book.addEnchantment(entry.getKey(), entry.getValue());
-                        }
-
-                        entity.item = new ItemStack(Items.ENCHANTED_BOOK);
-                        entity.item.setNbt(entity.book.getNbt());
-                        entity.book = entity.item.copy();
-
+                    if(entity.bookOpenAngle < 1F) {
+                        entity.bookOpenAngle += 0.1F;
+                    }else if(!world.isClient()){
+                        entity.bookOpenAngle = 1;
+                        entity.state = 3;
                         entity.sync();
                     }
                 }
-            }else {
+                break;
+            case 4: // TODO
+                if(entity.time > 60){
+                    if(entity.bookOpenAngle > 0F) {
+                        entity.bookOpenAngle -= 0.1F;
+                    }else{
+                        if(!world.isClient()){
+                            entity.state = 5;
+                            entity.time = 0;
+                            entity.bookOpenAngle = 0;
+
+                            Map<Enchantment, Integer> list =  EnchantmentHelper.fromNbt(entity.item.getEnchantments());
+                            for ( Map.Entry<Enchantment, Integer> entry : list.entrySet() ) {
+                                entity.book.addEnchantment(entry.getKey(), entry.getValue());
+                            }
+
+                            entity.item = new ItemStack(Items.ENCHANTED_BOOK);
+                            entity.item.setNbt(entity.book.getNbt());
+                            entity.book = entity.item.copy();
+
+                            entity.sync();
+                        }
+                    }
+                }else if(entity.time < 40){
+                    Random r = new Random();
+                    world.addParticle(ParticleTypes.ENCHANT, (double)pos.getX() + 0.5D, (double)pos.getY() + 1.0D, (double)pos.getZ() + 0.5D,
+                            (r.nextBoolean() ? -1 : 1) * r.nextFloat(),
+                            1,
+                            (r.nextBoolean() ? -1 : 1) * r.nextFloat());
+                }
                 entity.time += 1;
-            }
+                break;
         }
     }
 
@@ -210,7 +224,20 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
     @Override
     public NbtCompound toClientTag(NbtCompound nbt){ return this.writeNbt(nbt);}
 
+    public void cleanUp(World world){
+        if(!world.isClient()){
+            this.state = 0;
+            this.bookOpenAngle = 0;
+            this.time = 0;
+
+            this.item = new ItemStack(Items.AIR);
+            this.book = new ItemStack(Items.AIR);
+            this.sync();
+        }
+    }
+
     public ItemStack getItem(){return this.item;}
     public ItemStack getBook (){return this.book;}
     public float getBookOpenAngle (){return this.bookOpenAngle;}
+    public float getBookAngle (){return this.bookAngle;}
 }

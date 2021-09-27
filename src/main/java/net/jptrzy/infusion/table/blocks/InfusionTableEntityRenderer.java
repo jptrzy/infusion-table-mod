@@ -35,6 +35,7 @@ public class  InfusionTableEntityRenderer implements BlockEntityRenderer<Infusio
 
             matrices.translate(0.5, 0.9, 0.5);
 
+            matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion( -entity.getBookAngle() ));
             matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(80.0F));
 
             VertexConsumer vertexConsumer = BOOK_TEXTURE.getVertexConsumer(vertexConsumers, RenderLayer::getEntitySolid);
