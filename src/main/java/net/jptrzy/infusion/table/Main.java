@@ -31,4 +31,16 @@ public class Main implements ModInitializer {
 		Registry.register(Registry.BLOCK, new Identifier(Main.MOD_ID, "infusion_table"), INFUSION_TABLE);
 		Registry.register(Registry.ITEM, new Identifier(Main.MOD_ID, "infusion_table"), new BlockItem(INFUSION_TABLE, new FabricItemSettings().group(ItemGroup.DECORATIONS)));
 	}
+
+	public static float aroundRadial(float angle){
+		while(angle >= 3.1415927F) {
+			angle -= 6.2831855F;
+		}
+
+		while(angle < -3.1415927F) {
+			angle += 6.2831855F;
+		}
+
+		return angle;
+	}
 }

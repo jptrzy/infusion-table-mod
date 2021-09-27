@@ -32,8 +32,13 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
     private ItemStack item = new ItemStack(Items.AIR);
     private ItemStack book = new ItemStack(Items.AIR);
 
-    private float bookOpenAngle = 0F;
-    private float bookAngle = 0F;
+    public float bookOpenAngle = 0F;
+    public float bookLastOpenAngle = 0F;
+
+    public float bookRot = 0;
+    public float bookLastRot = 0;
+    public float bookRotDir = 0;
+    public float bookRotForce = 0;
 
     /*
     0 - empty | passive
@@ -133,10 +138,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
 
     public float bookAngleForce = 0;
 
-    public float bookRot = 0;
-    public float bookLastRot = 0;
-    public float bookRotDir = 0;
-    public float bookRotForce = 0;
+
 
     public static void tick(World world, BlockPos pos, BlockState state, InfusionTableEntity entity) {
 
@@ -151,65 +153,71 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
             entity.bookRotDir += 0.02F;
         }
 
-        entity.bookRotForce = (entity.bookRotDir - entity.bookRot) * 0.4F;
-        entity.bookRot += entity.bookRotForce;
+        entity.bookRot = Main.aroundRadial(entity.bookRot);
 
-        //for( entity.bookAngleForce = entity.bookAngle - entity.bookAngleForce;  entity.bookAngleForce >= 3.1415927F;  entity.bookAngleForce -= 6.2831855F) {}
+        entity.bookRotDir = Main.aroundRadial(entity.bookRotDir);
 
+        entity.bookRotForce = entity.bookRotDir - entity.bookRot;
 
+        entity.bookRotForce = Main.aroundRadial(entity.bookRotForce);
 
-//        switch (entity.state) {
-//            case 2:
-//                if(entity.item.isEmpty()){
-//                    if(entity.bookOpenAngle > 0F) {
-//                        entity.bookOpenAngle -= 0.1F;
-//                    }else if(!world.isClient()){
-//                        entity.bookOpenAngle = 0;
-//                        entity.state = 1;
-//                        entity.sync();
-//                    }
-//                }else{
-//                    if(entity.bookOpenAngle < 1F) {
-//                        entity.bookOpenAngle += 0.1F;
-//                    }else if(!world.isClient()){
-//                        entity.bookOpenAngle = 1;
-//                        entity.state = 3;
-//                        entity.sync();
-//                    }
-//                }
-//                break;
-//            case 4: // TODO
-//                if(entity.time > 60){
-//                    if(entity.bookOpenAngle > 0F) {
-//                        entity.bookOpenAngle -= 0.1F;
-//                    }else{
-//                        if(!world.isClient()){
-//                            entity.state = 5;
-//                            entity.time = 0;
-//                            entity.bookOpenAngle = 0;
-//
-//                            Map<Enchantment, Integer> list =  EnchantmentHelper.fromNbt(entity.item.getEnchantments());
-//                            for ( Map.Entry<Enchantment, Integer> entry : list.entrySet() ) {
-//                                entity.book.addEnchantment(entry.getKey(), entry.getValue());
-//                            }
-//
-//                            entity.item = new ItemStack(Items.ENCHANTED_BOOK);
-//                            entity.item.setNbt(entity.book.getNbt());
-//                            entity.book = entity.item.copy();
-//
-//                            entity.sync();
-//                        }
-//                    }
-//                }else if(entity.time < 40){
-//                    Random r = new Random();
-//                    world.addParticle(ParticleTypes.ENCHANT, (double)pos.getX() + 0.5D, (double)pos.getY() + 1.0D, (double)pos.getZ() + 0.5D,
-//                            (r.nextBoolean() ? -1 : 1) * r.nextFloat(),
-//                            1,
-//                            (r.nextBoolean() ? -1 : 1) * r.nextFloat());
-//                }
-//                entity.time += 1;
-//                break;
-//        }
+        entity.bookRot += entity.bookRotForce * 0.4F;
+
+        entity.bookLastOpenAngle = entity.bookOpenAngle;
+
+        switch (entity.state) {
+            case 2:
+
+                if(entity.item.isEmpty()){
+                    if(entity.bookOpenAngle > 0F) {
+                        entity.bookOpenAngle -= 0.1F;
+                    }else if(!world.isClient()){
+                        entity.bookOpenAngle = 0;
+                        entity.state = 1;
+                        entity.sync();
+                    }
+                }else{
+                    if(entity.bookOpenAngle < 1F) {
+                        entity.bookOpenAngle += 0.1F;
+                    }else if(!world.isClient()){
+                        entity.bookOpenAngle = 1;
+                        entity.state = 3;
+                        entity.sync();
+                    }
+                }
+                break;
+            case 4: // TODO
+                if(entity.time > 60){
+                    if(entity.bookOpenAngle > 0F) {
+                        entity.bookOpenAngle -= 0.1F;
+                    }else{
+                        if(!world.isClient()){
+                            entity.state = 5;
+                            entity.time = 0;
+                            entity.bookOpenAngle = 0;
+
+                            Map<Enchantment, Integer> list =  EnchantmentHelper.fromNbt(entity.item.getEnchantments());
+                            for ( Map.Entry<Enchantment, Integer> entry : list.entrySet() ) {
+                                entity.book.addEnchantment(entry.getKey(), entry.getValue());
+                            }
+
+                            entity.item = new ItemStack(Items.ENCHANTED_BOOK);
+                            entity.item.setNbt(entity.book.getNbt());
+                            entity.book = entity.item.copy();
+
+                            entity.sync();
+                        }
+                    }
+                }else if(entity.time < 40){
+                    Random r = new Random();
+                    world.addParticle(ParticleTypes.ENCHANT, (double)pos.getX() + 0.5D, (double)pos.getY() + 1.0D, (double)pos.getZ() + 0.5D,
+                            (r.nextBoolean() ? -1 : 1) * r.nextFloat(),
+                            1,
+                            (r.nextBoolean() ? -1 : 1) * r.nextFloat());
+                }
+                entity.time += 1;
+                break;
+        }
     }
 
     @Override
@@ -254,8 +262,8 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
         }
     }
 
+
     public ItemStack getItem(){return this.item;}
     public ItemStack getBook (){return this.book;}
     public float getBookOpenAngle (){return this.bookOpenAngle;}
-    public float getBookAngle (){return this.bookAngle;}
 }
