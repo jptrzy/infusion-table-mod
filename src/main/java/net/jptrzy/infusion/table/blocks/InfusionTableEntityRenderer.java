@@ -38,10 +38,10 @@ public class  InfusionTableEntityRenderer implements BlockEntityRenderer<Infusio
             matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion( -(entity.bookLastRot + Main.aroundRadial(entity.bookRot - entity.bookLastRot) * tickDelta) ));
             matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(80.0F));
 
-            this.book.setPageAngles(1, 0, 0, entity.bookLastOpenAngle + (entity.bookOpenAngle - entity.bookLastOpenAngle) * tickDelta );
-
             VertexConsumer vertexConsumer = BOOK_TEXTURE.getVertexConsumer(vertexConsumers, RenderLayer::getEntitySolid);
             vertexConsumer = getBookGlintConsumer(vertexConsumers, vertexConsumer, !entity.getBook().isEnchantable());
+
+            this.book.setPageAngles(1, 0, 0, entity.bookLastOpenAngle + (entity.bookOpenAngle - entity.bookLastOpenAngle) * tickDelta );
             this.book.renderBook(matrices, vertexConsumer, light, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
 
             matrices.pop();

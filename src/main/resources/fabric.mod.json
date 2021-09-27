@@ -4,13 +4,14 @@
   "version": "${version}",
 
   "name": "Infusion Table",
-  "description": "",
+  "description": "Infusion Table give player possibility to rip enchantment from item into book.",
   "authors": [
     "jptrzy"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/jptrzy/infusion-table-mod",
+    "sources": "https://github.com/jptrzy/infusion-table-mod",
+    "issues": "https://github.com/jptrzy/infusion-table-mod/issues"
   },
 
   "license": "gpl-3.0",
@@ -33,7 +34,5 @@
     "minecraft": "1.17.x",
     "java": ">=16"
   },
-  "suggests": {
-    "another-mod": "*"
-  }
+  "suggests": {}
 }
