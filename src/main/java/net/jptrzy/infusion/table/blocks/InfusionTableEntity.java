@@ -6,9 +6,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -196,14 +198,14 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                             entity.time = 0;
                             entity.bookOpenAngle = 0;
 
+                            entity.book = new ItemStack(Items.ENCHANTED_BOOK);
                             Map<Enchantment, Integer> list =  EnchantmentHelper.fromNbt(entity.item.getEnchantments());
                             for ( Map.Entry<Enchantment, Integer> entry : list.entrySet() ) {
-                                entity.book.addEnchantment(entry.getKey(), entry.getValue());
+                                EnchantedBookItem.addEnchantment(
+                                        entity.book,
+                                        new EnchantmentLevelEntry( entry.getKey(), entry.getValue() )
+                                );
                             }
-
-                            entity.item = new ItemStack(Items.ENCHANTED_BOOK);
-                            entity.item.setNbt(entity.book.getNbt());
-                            entity.book = entity.item.copy();
 
                             entity.sync();
                         }
