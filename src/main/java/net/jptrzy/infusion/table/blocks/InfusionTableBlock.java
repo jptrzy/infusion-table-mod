@@ -29,7 +29,7 @@ public class InfusionTableBlock extends Block implements BlockEntityProvider {
 
     public final static VoxelShape COLLISION_SHAPE;
 
-    public final static BlockSoundGroup soundGroup = BlockSoundGroup.COPPER;
+    public final static BlockSoundGroup soundGroup = BlockSoundGroup.DEEPSLATE_TILES;
 
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {

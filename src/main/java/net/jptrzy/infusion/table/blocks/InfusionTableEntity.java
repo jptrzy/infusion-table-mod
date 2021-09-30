@@ -15,6 +15,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -63,6 +66,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
             ItemStack item = player.getStackInHand(hand);
             ItemStack copy;
             if (this.state == 0 && item.isOf(Items.BOOK) && !item.hasEnchantments()) {
+                world.playSound(null, pos, SoundEvents.ENTITY_ITEM_FRAME_ADD_ITEM, SoundCategory.BLOCKS, .8f, .8f);
                 copy = item.copy();
                 copy.setCount(1);
                 this.book = copy;
@@ -71,6 +75,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                 this.state = 1;
                 this.sync();
             } else if (this.state == 1 && item.hasEnchantments() && !item.isOf(Items.BOOK) && !item.isOf(Items.ENCHANTED_BOOK)) {
+                world.playSound(null, pos, SoundEvents.ENTITY_ITEM_FRAME_ADD_ITEM, SoundCategory.BLOCKS, .8f, .8f);
                 copy = item.copy();
                 copy.setCount(1);
                 this.item = copy;
@@ -78,6 +83,8 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                 this.state = 2;
                 this.sync();
             }else if(this.state == 3 && item.isOf(Items.FLINT_AND_STEEL)){
+                world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, .8f, .8f);
+                world.playSound(null, pos, SoundEvents.ENTITY_GUARDIAN_ATTACK, SoundCategory.BLOCKS, .9f, .6f);
                 this.state = 4;
                 this.sync();
             }
@@ -105,11 +112,13 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                 this.sync();
             } else {
                 if (this.state == 3) {
+                    world.playSound(null, pos, SoundEvents.ENTITY_ITEM_FRAME_REMOVE_ITEM, SoundCategory.BLOCKS, .8f, .8f);
                     dropStack(world, pos, this.item);
                     this.item = new ItemStack(Items.AIR);
                     this.state = 2;
                     this.sync();
                 } else if (this.state == 1 || this.state == 5) {
+                    world.playSound(null, pos, SoundEvents.ENTITY_ITEM_FRAME_REMOVE_ITEM, SoundCategory.BLOCKS, .8f, .8f);
                     dropStack(world, pos, this.book);
                     this.book = new ItemStack(Items.AIR);
                     this.state = 0;
@@ -194,6 +203,8 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                         entity.bookOpenAngle -= 0.1F;
                     }else{
                         if(!world.isClient()){
+                            world.playSound(null, pos, SoundEvents.ENTITY_EVOKER_PREPARE_SUMMON, SoundCategory.BLOCKS, .8f, .8f);
+
                             entity.state = 5;
                             entity.time = 0;
                             entity.bookOpenAngle = 0;
@@ -210,7 +221,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                             entity.sync();
                         }
                     }
-                }else if(entity.time < 40){
+                }else if(entity.time < 36){
                     Random r = new Random();
                     world.addParticle(ParticleTypes.ENCHANT, (double)pos.getX() + 0.5D, (double)pos.getY() + 1.0D, (double)pos.getZ() + 0.5D,
                             (r.nextBoolean() ? -1 : 1) * r.nextFloat(),
