@@ -1,7 +1,7 @@
 package net.jptrzy.infusion.table.blocks;
 
-import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.jptrzy.infusion.table.Main;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.enchantment.Enchantment;
@@ -14,9 +14,11 @@ import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.Packet;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -32,7 +34,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.Supplier;
 
-public class InfusionTableEntity extends BlockEntity implements BlockEntityClientSerializable {
+public class InfusionTableEntity extends BlockEntity {
 
     private ItemStack item = new ItemStack(Items.AIR);
     private ItemStack book = new ItemStack(Items.AIR);
@@ -73,7 +75,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                 item.decrement(1);
                 this.bookOpenAngle = 0;
                 this.state = 1;
-                this.sync();
+                this.notifyListeners();
             } else if (this.state == 1 && item.hasEnchantments() && !item.isOf(Items.BOOK) && !item.isOf(Items.ENCHANTED_BOOK)) {
                 world.playSound(null, pos, SoundEvents.ENTITY_ITEM_FRAME_ADD_ITEM, SoundCategory.BLOCKS, .8f, .8f);
                 copy = item.copy();
@@ -81,12 +83,12 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                 this.item = copy;
                 item.decrement(1);
                 this.state = 2;
-                this.sync();
+                this.notifyListeners();
             }else if(this.state == 3 && item.isOf(Items.FLINT_AND_STEEL)){
                 world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, .8f, .8f);
                 world.playSound(null, pos, SoundEvents.ENTITY_GUARDIAN_ATTACK, SoundCategory.BLOCKS, .9f, .6f);
                 this.state = 4;
-                this.sync();
+                this.notifyListeners();
             }
         }
         return ActionResult.SUCCESS;
@@ -109,14 +111,14 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                     }
                     cleanUp(world);
                 }
-                this.sync();
+                this.notifyListeners();
             } else {
                 if (this.state == 3) {
                     world.playSound(null, pos, SoundEvents.ENTITY_ITEM_FRAME_REMOVE_ITEM, SoundCategory.BLOCKS, .8f, .8f);
                     dropStack(world, pos, this.item);
                     this.item = new ItemStack(Items.AIR);
                     this.state = 2;
-                    this.sync();
+                    this.notifyListeners();
                 } else if (this.state == 1 || this.state == 5) {
                     world.playSound(null, pos, SoundEvents.ENTITY_ITEM_FRAME_REMOVE_ITEM, SoundCategory.BLOCKS, .8f, .8f);
                     dropStack(world, pos, this.book);
@@ -125,7 +127,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                     if(this.state == 5){
                         cleanUp(world);
                     }
-                    this.sync();
+                    this.notifyListeners();
                 }
             }
         }
@@ -185,7 +187,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                     }else if(!world.isClient()){
                         entity.bookOpenAngle = 0;
                         entity.state = 1;
-                        entity.sync();
+                        entity.notifyListeners();
                     }
                 }else{
                     if(entity.bookOpenAngle < 1F) {
@@ -193,7 +195,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                     }else if(!world.isClient()){
                         entity.bookOpenAngle = 1;
                         entity.state = 3;
-                        entity.sync();
+                        entity.notifyListeners();
                     }
                 }
                 break;
@@ -218,7 +220,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
                                 );
                             }
 
-                            entity.sync();
+                            entity.notifyListeners();
                         }
                     }
                 }else if(entity.time < 36){
@@ -234,7 +236,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound tag) {
+    public void writeNbt(NbtCompound tag) {
         super.writeNbt(tag);
 
         tag.put("Item", this.item.writeNbt(new NbtCompound()));
@@ -242,8 +244,6 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
         tag.putInt("State", this.state);
         tag.putInt("Time", this.time);
         tag.putFloat("BookOpenAngle", this.bookOpenAngle);
-
-        return tag;
     }
 
     @Override
@@ -258,10 +258,24 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
     }
 
     @Override
-    public void fromClientTag(NbtCompound nbt){ this.readNbt(nbt); }
+    public NbtCompound toInitialChunkDataNbt() {
+        NbtCompound tag = super.toInitialChunkDataNbt();
+        writeNbt(tag);
+        return tag;
+    }
 
+    @Nullable
     @Override
-    public NbtCompound toClientTag(NbtCompound nbt){ return this.writeNbt(nbt);}
+    public Packet<ClientPlayPacketListener> toUpdatePacket() {
+        return BlockEntityUpdateS2CPacket.create(this);
+    }
+
+    public void notifyListeners() {
+        this.markDirty();
+
+        if(world != null && !world.isClient())
+            world.updateListeners(getPos(), getCachedState(), getCachedState(), Block.NOTIFY_ALL);
+    }
 
     public void cleanUp(World world){
         if(!world.isClient()){
@@ -271,7 +285,7 @@ public class InfusionTableEntity extends BlockEntity implements BlockEntityClien
 
             this.item = new ItemStack(Items.AIR);
             this.book = new ItemStack(Items.AIR);
-            this.sync();
+            this.notifyListeners();
         }
     }
 

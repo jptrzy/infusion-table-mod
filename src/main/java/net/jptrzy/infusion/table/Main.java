@@ -21,7 +21,7 @@ public class Main implements ModInitializer {
 	public static final String MOD_ID = "infusion_table";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
-	public static final Block INFUSION_TABLE = new InfusionTableBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f));
+	public static final Block INFUSION_TABLE = new InfusionTableBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f).luminance(7));
 	public static BlockEntityType<InfusionTableEntity> INFUSION_TABLE_ENTITY;
 
 	@Override
