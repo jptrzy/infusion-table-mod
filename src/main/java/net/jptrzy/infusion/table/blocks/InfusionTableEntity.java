@@ -155,28 +155,31 @@ public class InfusionTableEntity extends BlockEntity {
 
     public static void tick(World world, BlockPos pos, BlockState state, InfusionTableEntity entity) {
 
-        entity.bookLastRot = entity.bookRot;
+        //Book Rotation Animation
+        if(world.isClient() && entity.state != 0) {
+            entity.bookLastRot = entity.bookRot;
 
-        PlayerEntity playerEntity = world.getClosestPlayer((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, 3.0D, false);
-        if (playerEntity != null) {
-            double d = playerEntity.getX() - ((double) pos.getX() + 0.5D);
-            double e = playerEntity.getZ() - ((double) pos.getZ() + 0.5D);
-            entity.bookRotDir = (float) MathHelper.atan2(e, d);
-        }else{
-            entity.bookRotDir += 0.02F;
+            PlayerEntity playerEntity = world.getClosestPlayer((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, 3.0D, false);
+            if (playerEntity != null) {
+                double d = playerEntity.getX() - ((double) pos.getX() + 0.5D);
+                double e = playerEntity.getZ() - ((double) pos.getZ() + 0.5D);
+                entity.bookRotDir = (float) MathHelper.atan2(e, d);
+            } else {
+                entity.bookRotDir += 0.02F;
+            }
+
+            entity.bookRot = Main.aroundRadial(entity.bookRot);
+
+            entity.bookRotDir = Main.aroundRadial(entity.bookRotDir);
+
+            entity.bookRotForce = entity.bookRotDir - entity.bookRot;
+
+            entity.bookRotForce = Main.aroundRadial(entity.bookRotForce);
+
+            entity.bookRot += entity.bookRotForce * 0.4F;
+
+            entity.bookLastOpenAngle = entity.bookOpenAngle;
         }
-
-        entity.bookRot = Main.aroundRadial(entity.bookRot);
-
-        entity.bookRotDir = Main.aroundRadial(entity.bookRotDir);
-
-        entity.bookRotForce = entity.bookRotDir - entity.bookRot;
-
-        entity.bookRotForce = Main.aroundRadial(entity.bookRotForce);
-
-        entity.bookRot += entity.bookRotForce * 0.4F;
-
-        entity.bookLastOpenAngle = entity.bookOpenAngle;
 
         switch (entity.state) {
             case 2:
