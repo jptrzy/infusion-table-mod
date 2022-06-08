@@ -14,7 +14,7 @@
     "issues": "https://github.com/jptrzy/infusion-table-mod/issues"
   },
 
-  "license": "gpl-3.0",
+  "license": "lgpl-3.0",
   "icon": "assets/infusion_table/icon.png",
 
   "environment": "*",
@@ -30,7 +30,7 @@
   "depends": {
     "fabricloader": ">=0.11.3",
     "fabric": "*",
-    "minecraft": "1.18.x",
+    "minecraft": "1.19.x",
     "java": ">=17"
   },
   "suggests": {}
