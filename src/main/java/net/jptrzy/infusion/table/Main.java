@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.loader.api.FabricLoader;
 import net.jptrzy.infusion.table.blocks.InfusionTableBlock;
 import net.jptrzy.infusion.table.blocks.InfusionTableEntity;
 import net.minecraft.block.Block;
@@ -23,9 +24,12 @@ public class Main implements ModInitializer {
 
 	public static final Block INFUSION_TABLE = new InfusionTableBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f).luminance(7));
 	public static BlockEntityType<InfusionTableEntity> INFUSION_TABLE_ENTITY;
+	public static boolean CARRIER_MOD_LOADED;
 
 	@Override
 	public void onInitialize() {
+		CARRIER_MOD_LOADED = FabricLoader.getInstance().isModLoaded("carrier");
+
 		INFUSION_TABLE_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, Main.MOD_ID + ":infusion_table_entity", FabricBlockEntityTypeBuilder.create(InfusionTableEntity::new, INFUSION_TABLE).build(null));
 
 		Registry.register(Registry.BLOCK, new Identifier(Main.MOD_ID, "infusion_table"), INFUSION_TABLE);

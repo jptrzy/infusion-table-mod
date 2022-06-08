@@ -66,6 +66,9 @@ public class InfusionTableEntity extends BlockEntity {
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if(!world.isClient()) {
             ItemStack item = player.getStackInHand(hand);
+            if( item.isEmpty() || (player.isSneaking() && !Main.CARRIER_MOD_LOADED) ){
+                this.onBreak(state, world, pos, player);
+            }
             ItemStack copy;
             if (this.state == 0 && item.isOf(Items.BOOK) && !item.hasEnchantments()) {
                 world.playSound(null, pos, SoundEvents.ENTITY_ITEM_FRAME_ADD_ITEM, SoundCategory.BLOCKS, .8f, .8f);
@@ -296,4 +299,5 @@ public class InfusionTableEntity extends BlockEntity {
     public ItemStack getItem(){return this.item;}
     public ItemStack getBook (){return this.book;}
     public float getBookOpenAngle (){return this.bookOpenAngle;}
+    public int getState(){ return this.state; }
 }
