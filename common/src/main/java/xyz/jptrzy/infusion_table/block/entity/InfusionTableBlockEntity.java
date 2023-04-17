@@ -10,6 +10,8 @@ import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -25,6 +27,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
@@ -35,7 +38,7 @@ import xyz.jptrzy.infusion_table.InfusionTable;
 import java.util.Map;
 import java.util.Random;
 
-public class InfusionTableBlockEntity extends BlockEntity {
+public class InfusionTableBlockEntity extends BlockEntity implements SidedInventory {
     public enum Status {
         Passive,
         Waiting,
@@ -288,6 +291,101 @@ public class InfusionTableBlockEntity extends BlockEntity {
             itemEntity.setToDefaultPickupDelay();
             world.spawnEntity(itemEntity);
         }
+    }
+
+    // Hopper Support
+
+    /*
+        Inventory
+
+        0 -  book
+        1 -  item
+     */
+
+    // TODO make it more dependent on vanilla
+
+    public int[] getAvailableSlots(Direction side) {
+        if (side == Direction.DOWN || side == Direction.UP )
+            return new int[]{0};
+        return new int[]{1};
+    }
+
+    public boolean canInsert(int slot, ItemStack stack, @javax.annotation.Nullable Direction dir) {
+        if (status == Status.Passive && stack.getCount() == 1) {
+            if (slot == 0) {
+                return book.isEmpty() && stack.isOf(Items.BOOK);
+            } else if (slot == 1) {
+                return !book.isEmpty() && item.isEmpty() && stack.hasEnchantments();
+            } else {
+                InfusionTable.LOGGER.error("Asking for insertion of unexpected slot {}", slot);
+
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean canExtract(int slot, ItemStack stack, Direction dir) {
+        return slot == 0 && status == Status.Passive && book.isOf(Items.ENCHANTED_BOOK);
+    }
+
+    @Override
+    public int size() {
+        return 2;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
+    public ItemStack getStack(int slot) {
+        return slot == 0 ? book : item;
+    }
+
+    @Override
+    public ItemStack removeStack(int slot, int amount) {
+        ItemStack stack = getStack(slot).copy();
+        stack.setCount(amount);
+
+        getStack(slot).decrement(amount);
+
+        notifyListeners();
+
+        return stack;
+    }
+
+    @Override
+    public ItemStack removeStack(int slot) {
+        return removeStack(slot, 1);
+    }
+
+    @Override
+    public void setStack(int slot, ItemStack stack) {
+        if (slot == 0) {
+            book = stack;
+        } else if (slot == 1) {
+            if (book.isOf(Items.BOOK)) {
+                item = stack;
+                status = Status.Enchanting;
+            }
+        } else {
+            InfusionTable.LOGGER.error("Asking for changing stack of unexpected slot {}", slot);
+        }
+
+        notifyListeners();
+    }
+
+    @Override
+    public boolean canPlayerUse(PlayerEntity player) {
+        return false;
+    }
+
+    @Override
+    public void clear() {
+        InfusionTable.LOGGER.error("Clearing infusion table");
     }
 
 }
