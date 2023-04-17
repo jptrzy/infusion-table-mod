@@ -54,9 +54,6 @@ public class InfusionTableBlock extends BlockWithEntity {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        if (world.isClient) {
-            return null;
-        }
         return checkType(type, InfusionTable.INFUSION_TABLE_BLOCK_ENTITY.get(), InfusionTableBlockEntity::tick);
     }
 
@@ -64,7 +61,6 @@ public class InfusionTableBlock extends BlockWithEntity {
     protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> checkType(BlockEntityType<A> givenType, BlockEntityType<E> expectedType, BlockEntityTicker<? super E> ticker) {
         return expectedType == givenType ? (BlockEntityTicker<A>) ticker : null;
     }
-
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {

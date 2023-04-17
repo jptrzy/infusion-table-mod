@@ -9,6 +9,8 @@ import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -36,6 +38,18 @@ public class InfusionTable {
     public static RegistrySupplier<BlockItem> INFUSION_TABLE_BLOCK_ITEM = ITEM_REGISTRAR.register(INFUSION_TABLE_ID, () -> new BlockItem(INFUSION_TABLE_BLOCK.get(), new Item.Settings().group(ItemGroup.REDSTONE)));
     public static RegistrySupplier<BlockEntityType<InfusionTableBlockEntity>> INFUSION_TABLE_BLOCK_ENTITY = BLOCK_ENTITY_TYPE_REGISTRAR.register(INFUSION_TABLE_ID, () -> BlockEntityType.Builder.create(InfusionTableBlockEntity::new, INFUSION_TABLE_BLOCK.get()).build(null));
 
-
     public static void init() { }
+
+    public static float aroundRadial(float angle){
+        while(angle >= 3.1415927F) {
+            angle -= 6.2831855F;
+        }
+
+        while(angle < -3.1415927F) {
+            angle += 6.2831855F;
+        }
+
+        return angle;
+    }
+
 }
