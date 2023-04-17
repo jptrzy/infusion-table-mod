@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "infusion_table",
+  "version": "${version}",
+  "name": "infusion_table",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "GNU LGPL 3.0",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "xyz.jptrzy.infusion_table.fabric.InfusionTableFabric"
+    ],
+    "client": [
+      "xyz.jptrzy.infusion_table.fabric.InfusionTableFabricClient"
+    ]
+  },
+  "mixins": [
+    "infusion_table.mixins.json",
+    "infusion_table-common.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "minecraft": ">=1.19.2"
+  }
+}
