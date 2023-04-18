@@ -2,10 +2,14 @@
   "schemaVersion": 1,
   "id": "infusion_table",
   "version": "${version}",
-  "name": "infusion_table",
-  "description": "",
-  "authors": [],
-  "contact": {},
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": ["jptrzy"],
+  "contact": {
+    "homepage": "https://github.com/jptrzy/infusion-table-mod",
+    "sources": "https://github.com/jptrzy/infusion-table-mod",
+    "issues": "https://github.com/jptrzy/infusion-table-mod/issues"
+  },
   "license": "GNU LGPL 3.0",
   "icon": "icon.png",
   "environment": "*",

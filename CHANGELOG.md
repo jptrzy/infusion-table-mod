@@ -1,3 +1,7 @@
+# 1.2.0
+* Architectury API
+* Hopper Support
+* Forge Support
 
 # 1.1.0
 * Change LICENSE from GPL 3 to LGPL 3

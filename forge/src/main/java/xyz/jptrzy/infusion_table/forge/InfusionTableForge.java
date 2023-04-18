@@ -13,8 +13,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import xyz.jptrzy.infusion_table.client.InfusionTableBlockEntityRenderer;
 
 @Mod(InfusionTable.MOD_ID)
-public class Infusion_tableForge {
-    public Infusion_tableForge() {
+public class InfusionTableForge {
+    public InfusionTableForge() {
         // Submit our event bus to let architectury register our content on the right time
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
         EventBuses.registerModEventBus(InfusionTable.MOD_ID, eventBus);

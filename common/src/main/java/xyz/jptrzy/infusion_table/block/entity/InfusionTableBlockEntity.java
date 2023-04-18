@@ -279,15 +279,15 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
 
     public static void dropStack(World world, BlockPos pos, ItemStack stack) {
         float f = EntityType.ITEM.getHeight() / 2.0F;
-        double d = (double)((float)pos.getX() + 0.5F);
+        double d = (float)pos.getX() + 0.5F;
         double e = (double)((float)pos.getY() + 1F) - (double)f;
-        double g = (double)((float)pos.getZ() + 0.5F);
-        dropStack(world, () -> { return new ItemEntity(world, d, e, g, stack);}, stack);
+        double g = ( float)pos.getZ() + 0.5F;
+        dropStack(world, () -> new ItemEntity(world, d, e, g, stack), stack);
     }
 
     private static void dropStack(World world, Supplier<ItemEntity> itemEntitySupplier, ItemStack stack) {
         if (!world.isClient && !stack.isEmpty() && world.getGameRules().getBoolean(GameRules.DO_TILE_DROPS)) {
-            ItemEntity itemEntity = (ItemEntity)itemEntitySupplier.get();
+            ItemEntity itemEntity = itemEntitySupplier.get();
             itemEntity.setToDefaultPickupDelay();
             world.spawnEntity(itemEntity);
         }
@@ -302,7 +302,20 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
         1 -  item
      */
 
-    // TODO make it more dependent on vanilla
+    enum Slot {
+        BOOK(0),
+        ITEM(1);
+
+        private final int value;
+
+        Slot(final int newValue) {
+            value = newValue;
+        }
+
+        public int getValue() { return value; }
+    }
+
+    // TODO make it more dependent on calls up the code
 
     public int[] getAvailableSlots(Direction side) {
         if (side == Direction.DOWN || side == Direction.UP )

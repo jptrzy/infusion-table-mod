@@ -25,9 +25,15 @@ dependencies {
 
 processResources {
     inputs.property "version", project.version
+    inputs.property "mod_description", rootProject.mod_description
+    inputs.property "mod_name", rootProject.mod_description
+    inputs.property "mod_authors", rootProject.mod_authors
 
     filesMatching("META-INF/mods.toml") {
-        expand "version": project.version
+        expand "version": project.version,
+            "mod_description": rootProject.mod_description,
+            "mod_name": rootProject.mod_name,
+            "mod_authors": rootProject.mod_authors
     }
 }
 
