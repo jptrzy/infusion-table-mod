@@ -8,7 +8,6 @@ import dev.architectury.registry.registries.RegistrarManager;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -32,9 +31,9 @@ public class InfusionTable {
     public static final Registrar<BlockEntityType<?>> BLOCK_ENTITY_TYPE_REGISTRAR = MANAGER.get().get(RegistryKeys.BLOCK_ENTITY_TYPE);
 
     public static final Identifier INFUSION_TABLE_ID = new Identifier(MOD_ID, "infusion_table");
-    public static RegistrySupplier<Block> INFUSION_TABLE_BLOCK = BLOCK_REGISTRAR.register(INFUSION_TABLE_ID, () -> new InfusionTableBlock(AbstractBlock.Settings.of(Material.METAL).strength(4.0f).luminance(new BlockLuminance(7))));
+    public static RegistrySupplier<Block> INFUSION_TABLE_BLOCK = BLOCK_REGISTRAR.register(INFUSION_TABLE_ID, () -> new InfusionTableBlock(AbstractBlock.Settings.create().strength(4.0f).luminance(new BlockLuminance(7))));
     // TODO creative tab group
-    public static RegistrySupplier<BlockItem> INFUSION_TABLE_BLOCK_ITEM = ITEM_REGISTRAR.register(INFUSION_TABLE_ID, () -> new BlockItem(INFUSION_TABLE_BLOCK.get(), new Item.Settings().arch$tab(ItemGroups.REDSTONE)));
+    public static RegistrySupplier<BlockItem> INFUSION_TABLE_BLOCK_ITEM = ITEM_REGISTRAR.register(INFUSION_TABLE_ID, () -> new BlockItem(INFUSION_TABLE_BLOCK.get(), new Item.Settings().arch$tab(ItemGroups.FUNCTIONAL)));
     public static RegistrySupplier<BlockEntityType<InfusionTableBlockEntity>> INFUSION_TABLE_BLOCK_ENTITY = BLOCK_ENTITY_TYPE_REGISTRAR.register(INFUSION_TABLE_ID, () -> BlockEntityType.Builder.create(InfusionTableBlockEntity::new, INFUSION_TABLE_BLOCK.get()).build(null));
 
     public static void init() { }
