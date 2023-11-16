@@ -17,8 +17,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.Packet;
 import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
@@ -323,7 +323,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
         return new int[]{1};
     }
 
-    public boolean canInsert(int slot, ItemStack stack, @javax.annotation.Nullable Direction dir) {
+    public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
         if (status == Status.Passive && stack.getCount() == 1) {
             if (slot == 0) {
                 return book.isEmpty() && stack.isOf(Items.BOOK);
