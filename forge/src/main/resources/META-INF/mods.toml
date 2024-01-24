@@ -1,5 +1,5 @@
 modLoader = "javafml" #mandatory
-loaderVersion = "[46,47,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion = "[46,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 license = "GNU LGPL 3.0"
 issueTrackerURL = "https://jp3/infusion_table/issues"
 
@@ -16,7 +16,7 @@ description = '''${mod_description}'''
 [[dependencies.infusion_table]]
 modId = "forge" #mandatory
 mandatory = true #mandatory
-versionRange = "[46,47,)" #mandatory
+versionRange = "[46,)" #mandatory
 ordering = "NONE"
 side = "BOTH"
 
