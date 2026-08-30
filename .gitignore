@@ -18,3 +18,6 @@ classes/
 .settings
 *.launch
 .architectury-transformer
+
+# MacOS Stuff
+.DS_Store

@@ -1,5 +1,6 @@
 package xyz.jptrzy.infusion_table.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -18,11 +19,17 @@ import xyz.jptrzy.infusion_table.InfusionTable;
 import xyz.jptrzy.infusion_table.block.entity.InfusionTableBlockEntity;
 
 public class InfusionTableBlock extends BlockWithEntity {
+    public static final MapCodec<InfusionTableBlock> CODEC = createCodec(InfusionTableBlock::new);
+
     public final static VoxelShape COLLISION_SHAPE;
     public final static BlockSoundGroup soundGroup;
 
     public InfusionTableBlock(Settings settings) {
         super(settings);
+    }
+
+    protected MapCodec<? extends BlockWithEntity> getCodec() {
+        return CODEC;
     }
 
     @Override

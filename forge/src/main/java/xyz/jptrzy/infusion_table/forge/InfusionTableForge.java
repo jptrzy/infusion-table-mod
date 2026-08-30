@@ -14,9 +14,9 @@ import xyz.jptrzy.infusion_table.client.InfusionTableBlockEntityRenderer;
 
 @Mod(InfusionTable.MOD_ID)
 public class InfusionTableForge {
-    public InfusionTableForge() {
+    public InfusionTableForge(FMLJavaModLoadingContext context) {
         // Submit our event bus to let architectury register our content on the right time
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus eventBus = context.getModEventBus();
         EventBuses.registerModEventBus(InfusionTable.MOD_ID, eventBus);
 
         InfusionTable.init();
