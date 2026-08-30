@@ -41,12 +41,20 @@ processResources {
     inputs.property "mod_description", rootProject.mod_description
     inputs.property "mod_name", rootProject.mod_description
     inputs.property "mod_authors", rootProject.mod_authors
+    inputs.property "forge_forge_version", rootProject.forge_forge_version
+    inputs.property "forge_minecraft_version", rootProject.forge_minecraft_version
+    inputs.property "forge_architectury_version", rootProject.forge_architectury_version
+
+
 
     filesMatching("META-INF/mods.toml") {
         expand "version": project.version,
                 "mod_description": rootProject.mod_description,
                 "mod_name": rootProject.mod_name,
-                "mod_authors": rootProject.mod_authors
+                "mod_authors": rootProject.mod_authors,
+                "forge_forge_version": rootProject.forge_forge_version,
+                "forge_minecraft_version": rootProject.forge_minecraft_version,
+                "forge_architectury_version": rootProject.forge_architectury_version
     }
 }
 

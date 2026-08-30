@@ -33,11 +33,15 @@ processResources {
     inputs.property "version", project.version
     inputs.property "mod_name", rootProject.mod_name
     inputs.property "mod_description", rootProject.mod_description
+    inputs.property "fabric_minecraft_version", rootProject.fabric_minecraft_version
+    inputs.property "fabric_architectury_version", rootProject.fabric_architectury_version
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
                 "mod_name": rootProject.mod_name,
-                "mod_description": rootProject.mod_description
+                "mod_description": rootProject.mod_description,
+                "fabric_minecraft_version": rootProject.fabric_minecraft_version,
+                "fabric_architectury_version": rootProject.fabric_architectury_version
     }
 }
 
