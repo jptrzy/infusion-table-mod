@@ -167,7 +167,8 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
 
                     notifyListeners();
                 }
-            } else if (item.isEmpty() && hand_item.hasEnchantments()) {
+            } else if (item.isEmpty() && hand_item.hasEnchantments() && book.isOf(Items.BOOK)) {
+                // WARN book.hasEnchantments() and book.getEnchantments() doesnt work use book.getComponents() instead
                 item = hand_item.copy();
                 item.setCount(1);
 
