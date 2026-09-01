@@ -11,6 +11,7 @@
     "c": {"item": "minecraft:polished_deepslate"}
   },
   "result": {
-    "item": "infusion_table:infusion_table"
+    "id": "infusion_table:infusion_table",
+    "count": 1
   }
 }
