@@ -158,6 +158,8 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
         if (status == Status.Passive) {
             if (book.isEmpty()) {
                 if (hand_item.getItem() == Items.BOOK) {
+                    world.playSound(null, pos, SoundEvents.BLOCK_CHISELED_BOOKSHELF_INSERT, SoundCategory.BLOCKS, .8f, .8f);
+
                     book = hand_item.copy();
                     book.setCount(1);
 
@@ -168,6 +170,8 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
                     notifyListeners();
                 }
             } else if (item.isEmpty() && hand_item.hasEnchantments() && book.isOf(Items.BOOK)) {
+                world.playSound(null, pos, SoundEvents.BLOCK_CHISELED_BOOKSHELF_INSERT_ENCHANTED, SoundCategory.BLOCKS, .8f, 1.2f);
+
                 // WARN book.hasEnchantments() and book.getEnchantments() doesnt work use book.getComponents() instead
                 item = hand_item.copy();
                 item.setCount(1);
@@ -187,6 +191,8 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
             notifyListeners();
         }
 
+        world.playSound(null, pos, SoundEvents.BLOCK_CRAFTER_FAIL, SoundCategory.BLOCKS, .8f, 2f);
+
         return ActionResult.SUCCESS;
     }
 
@@ -198,6 +204,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
             dropStack(world, pos, book);
 
             cleanUp(world);
+            return;
         } else if (status == Status.Passive || status == Status.Waiting) {
             if (!book.isEmpty()) {
                 world.playSound(null, pos, SoundEvents.ENTITY_ITEM_FRAME_REMOVE_ITEM, SoundCategory.BLOCKS, .8f, .8f);
@@ -209,8 +216,11 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
                 (item.isEmpty() ? book : item).decrement(1);
 
                 notifyListeners();
+                return;
             }
         }
+
+        world.playSound(null, pos, SoundEvents.BLOCK_CRAFTER_FAIL, SoundCategory.BLOCKS, .6f, 2f);
     }
 
     public void onExplosion(World world, BlockPos pos, Explosion explosion) {
