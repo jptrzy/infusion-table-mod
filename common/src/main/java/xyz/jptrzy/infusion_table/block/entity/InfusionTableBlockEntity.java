@@ -4,6 +4,7 @@ import com.google.common.base.Supplier;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
@@ -21,6 +22,8 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
@@ -37,6 +40,7 @@ import xyz.jptrzy.infusion_table.InfusionTable;
 
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public class InfusionTableBlockEntity extends BlockEntity implements SidedInventory {
     public enum Status {
@@ -106,7 +110,6 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
 
                     entity.bookOpenAngle = 1;
 
-                    // TODO Remove useless calls
                     entity.notifyListeners();
                 } else {
                     entity.bookOpenAngle += .1;
@@ -125,14 +128,10 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
                     entity.ticks = 0;
                     entity.bookOpenAngle = 0;
 
-                    // TODO Simplify it
                     entity.book = new ItemStack(Items.ENCHANTED_BOOK);
-                    Map<Enchantment, Integer> list =  EnchantmentHelper.fromNbt(entity.item.getEnchantments());
-                    for ( Map.Entry<Enchantment, Integer> entry : list.entrySet() ) {
-                        EnchantedBookItem.addEnchantment(
-                                entity.book, new EnchantmentLevelEntry( entry.getKey(), entry.getValue() )
-                        );
-                    }
+
+                    ItemEnchantmentsComponent component =  entity.item.getEnchantments();
+                    EnchantmentHelper.set(entity.book, component);
 
                     entity.item.decrement(1);
 
@@ -219,33 +218,46 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
 
     // NBT
 
-    @Override
-    public void writeNbt(NbtCompound tag) {
-        super.writeNbt(tag);
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.writeNbt(nbt, registryLookup);
 
-        tag.put("Item", this.item.writeNbt(new NbtCompound()));
-        tag.put("Book", this.book.writeNbt(new NbtCompound()));
-        tag.putString("Status", this.status.name());
-        tag.putFloat("Ticks", this.ticks);
-        tag.putFloat("Angle", this.bookOpenAngle);
+        if (!this.item.isEmpty()) {
+            nbt.put("Item", this.item.encode(registryLookup));
+        }
+        if (!this.book.isEmpty()) {
+            nbt.put("Book", this.book.encode(registryLookup));
+        }
+        nbt.putString("Status", this.status.name());
+        nbt.putFloat("Ticks", this.ticks);
+        nbt.putFloat("Angle", this.bookOpenAngle);
     }
 
-    @Override
-    public void readNbt(NbtCompound tag) {
-        super.readNbt(tag);
+    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.readNbt(nbt, registryLookup);
 
-        this.item = ItemStack.fromNbt(tag.getCompound("Item"));
-        this.book = ItemStack.fromNbt(tag.getCompound("Book"));
-        this.status = Status.valueOf(tag.getString("Status"));
-        this.ticks = tag.getFloat("Ticks");
-        this.bookOpenAngle = tag.getFloat("Angle");
+        // TODO Make it cleaner
+        // Removes the error message
+        if (!nbt.getCompound("Item").isEmpty()) {
+            this.item = ItemStack.fromNbt(registryLookup, nbt.getCompound("Item")).orElse(ItemStack.EMPTY);
+        } else {
+            this.item = ItemStack.EMPTY;
+        }
+
+        if (!nbt.getCompound("Book").isEmpty()) {
+            this.book = ItemStack.fromNbt(registryLookup, nbt.getCompound("Book")).orElse(ItemStack.EMPTY);
+        } else {
+            this.book = ItemStack.EMPTY;
+        }
+
+        this.status = Status.valueOf(nbt.getString("Status"));
+        this.ticks = nbt.getFloat("Ticks");
+        this.bookOpenAngle = nbt.getFloat("Angle");
     }
 
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        NbtCompound tag = super.toInitialChunkDataNbt();
-        writeNbt(tag);
-        return tag;
+    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+        NbtCompound nbt = super.toInitialChunkDataNbt(registryLookup);
+        writeNbt(nbt, registryLookup);
+        return nbt;
     }
 
     @Nullable
