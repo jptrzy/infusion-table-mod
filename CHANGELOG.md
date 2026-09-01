@@ -1,3 +1,8 @@
+# 1.2.2+1.20.5
+* Resolve issue with player placing item on infusion table with enchanted book
+* Add sound on inserting items (or trying) to infusion table
+* Migration from Forge to NeoForge
+
 # 1.2.1+1.20.4
 * Change LICENSE from GPL 3 to All Right Reserved
 * Forge Icon Fix
