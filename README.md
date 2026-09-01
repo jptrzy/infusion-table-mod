@@ -23,5 +23,6 @@ or you can [watch it](https://www.youtube.com/watch?v=i-Hb81RSl14).
 
 ## Useful commands for debugging
 ```
-/give @s stick{Enchantments:[{id:"minecraft:fire_aspect",lvl:2}]}
+/give @s stick[enchantments={levels:{"minecraft:fire_aspect":2}}]
+/give @s stick[enchantments={levels:{"minecraft:sharpness":5,"minecraft:fire_aspect":2,"minecraft:unbreaking":3}}]
 ```
