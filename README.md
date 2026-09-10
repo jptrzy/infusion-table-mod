@@ -20,9 +20,3 @@ Becouse it is based on [Architectury API](https://modrinth.com/mod/architectury-
 4. Use **Flint and Steel** on it and watch the show.
 
 or you can [watch it](https://www.youtube.com/watch?v=i-Hb81RSl14).
-
-## Useful commands for debugging
-```
-/give @s stick[enchantments={levels:{"minecraft:fire_aspect":2}}]
-/give @s stick[enchantments={levels:{"minecraft:sharpness":5,"minecraft:fire_aspect":2,"minecraft:unbreaking":3}}]
-```
