@@ -13,7 +13,6 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SidedInventory;
-import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -39,6 +38,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.jptrzy.infusion_table.InfusionTable;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -233,10 +233,10 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
         super.writeNbt(nbt, registryLookup);
 
         if (!this.item.isEmpty()) {
-            nbt.put("Item", this.item.encode(registryLookup));
+            nbt.put("Item", this.item.toNbt(registryLookup));
         }
         if (!this.book.isEmpty()) {
-            nbt.put("Book", this.book.encode(registryLookup));
+            nbt.put("Book", this.book.toNbt(registryLookup));
         }
         nbt.putString("Status", this.status.name());
         nbt.putFloat("Ticks", this.ticks);
@@ -309,7 +309,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
     }
 
     private static void dropStack(World world, Supplier<ItemEntity> itemEntitySupplier, ItemStack stack) {
-        if (!world.isClient && !stack.isEmpty() && world.getGameRules().getBoolean(GameRules.DO_TILE_DROPS)) {
+        if (!world.isClient && !stack.isEmpty() && Objects.requireNonNull(world.getServer()).getGameRules().getBoolean(GameRules.DO_TILE_DROPS)) {
             ItemEntity itemEntity = itemEntitySupplier.get();
             itemEntity.setToDefaultPickupDelay();
             world.spawnEntity(itemEntity);

@@ -13,12 +13,12 @@ import net.minecraft.client.render.entity.model.BookModel;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
@@ -52,7 +52,7 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
         vertexConsumer = getBookGlintConsumer(vertexConsumers, vertexConsumer, entity.book.hasGlint());
 
         book_model.setPageAngles(1, 0, 0, entity.bookLastOpenAngle + (entity.bookOpenAngle - entity.bookLastOpenAngle) * tickDelta );
-        book_model.renderBook(matrices, vertexConsumer, light, overlay, ColorHelper.Argb.fromFloats(1.0F, 1.0F, 1.0F, 1.0F));
+        book_model.render(matrices, vertexConsumer, light, overlay);
 
         matrices.pop();
 
