@@ -71,11 +71,9 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
     }
 
     public static VertexConsumer getBookGlintConsumer(VertexConsumerProvider vertexConsumers, VertexConsumer vertexConsumer, boolean glint) {
-        // TODO Minecraft code is fucking amazing - when glint only starts to work with fancy option - not fast or fabulous.
-
         if (!glint) return vertexConsumer;
 
-        return MinecraftClient.isFabulousGraphicsOrBetter() ? VertexConsumers.union(vertexConsumers.getBuffer(RenderLayer.getGlintTranslucent()), vertexConsumer) : VertexConsumers.union(vertexConsumers.getBuffer(RenderLayer.getEntityGlint()), vertexConsumer);
+        return VertexConsumers.union(vertexConsumers.getBuffer(RenderLayer.getEntityGlint()), vertexConsumer);
     }
 
     static {
