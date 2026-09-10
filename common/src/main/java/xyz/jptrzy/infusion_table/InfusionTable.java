@@ -30,7 +30,7 @@ public class InfusionTable {
     public static final Registrar<Block> BLOCK_REGISTRAR = MANAGER.get().get(RegistryKeys.BLOCK);
     public static final Registrar<BlockEntityType<?>> BLOCK_ENTITY_TYPE_REGISTRAR = MANAGER.get().get(RegistryKeys.BLOCK_ENTITY_TYPE);
 
-    public static final Identifier INFUSION_TABLE_ID = new Identifier(MOD_ID, "infusion_table");
+    public static final Identifier INFUSION_TABLE_ID = Identifier.of(MOD_ID, "infusion_table");
     public static RegistrySupplier<Block> INFUSION_TABLE_BLOCK = BLOCK_REGISTRAR.register(INFUSION_TABLE_ID, () -> new InfusionTableBlock(AbstractBlock.Settings.create().strength(4.0f).luminance(new BlockLuminance(7))));
 
     public static RegistrySupplier<BlockItem> INFUSION_TABLE_BLOCK_ITEM = ITEM_REGISTRAR.register(INFUSION_TABLE_ID, () -> new BlockItem(INFUSION_TABLE_BLOCK.get(), new Item.Settings().arch$tab(ItemGroups.FUNCTIONAL)));

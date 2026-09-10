@@ -13,9 +13,6 @@ import xyz.jptrzy.infusion_table.client.InfusionTableBlockEntityRenderer;
 @Mod(InfusionTable.MOD_ID)
 public class InfusionTableNeoForge {
     public InfusionTableNeoForge(IEventBus eventBus, ModContainer container) {
-        //EventBuses.registerModEventBus(InfusionTable.MOD_ID, eventBus);
-//        eventBus.register(InfusionTable.MOD_ID);
-
         InfusionTable.init();
 
         eventBus.addListener(this::setupClient);

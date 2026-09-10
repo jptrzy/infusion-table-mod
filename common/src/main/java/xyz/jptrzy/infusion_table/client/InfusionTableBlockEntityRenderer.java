@@ -20,6 +20,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
@@ -51,7 +52,7 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
         vertexConsumer = getBookGlintConsumer(vertexConsumers, vertexConsumer, entity.book.hasGlint());
 
         book_model.setPageAngles(1, 0, 0, entity.bookLastOpenAngle + (entity.bookOpenAngle - entity.bookLastOpenAngle) * tickDelta );
-        book_model.renderBook(matrices, vertexConsumer, light, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
+        book_model.renderBook(matrices, vertexConsumer, light, overlay, ColorHelper.Argb.fromFloats(1.0F, 1.0F, 1.0F, 1.0F));
 
         matrices.pop();
 
@@ -78,6 +79,6 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
     }
 
     static {
-        BOOK_TEXTURE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("entity/enchanting_table_book"));
+        BOOK_TEXTURE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Identifier.of("entity/enchanting_table_book"));
     }
 }
