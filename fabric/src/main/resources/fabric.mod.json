@@ -26,7 +26,7 @@
     "infusion_table-common.mixins.json"
   ],
   "depends": {
-    "fabric": "*",
+    "fabric": "${fabric_fabric_version}",
     "minecraft": "${fabric_minecraft_version}",
     "architectury": "${fabric_architectury_version}"
   }
