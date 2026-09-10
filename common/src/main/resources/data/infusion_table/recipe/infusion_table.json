@@ -6,9 +6,9 @@
     "bbb"
   ],
   "key": {
-    "a": {"item": "minecraft:amethyst_shard"},
-    "b": {"item": "minecraft:crying_obsidian"},
-    "c": {"item": "minecraft:polished_deepslate"}
+    "a": "minecraft:amethyst_shard",
+    "b": "minecraft:crying_obsidian",
+    "c": "minecraft:polished_deepslate"
   },
   "result": {
     "id": "infusion_table:infusion_table",
