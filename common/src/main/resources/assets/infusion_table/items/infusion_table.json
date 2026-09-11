@@ -1,3 +1,6 @@
 {
-	"parent": "infusion_table:block/infusion_table"
+	"model": {
+		"type": "minecraft:model",
+		"model": "infusion_table:block/infusion_table"
+	}
 }
