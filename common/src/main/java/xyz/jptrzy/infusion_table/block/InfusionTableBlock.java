@@ -7,6 +7,7 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -80,12 +81,16 @@ public class InfusionTableBlock extends BlockWithEntity {
         return ActionResult.PASS;
     }
 
-    @Override public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    @Override
+    public void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+    //public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+       // TODO check if works after changes with tnt
+        var newState = world.getBlockState(pos);
         if (!state.isOf(newState.getBlock())) {
             if(world.getBlockEntity(pos) != null) {
                 ((InfusionTableBlockEntity) world.getBlockEntity(pos)).onBreak(state, world, pos, null);
             }
-            super.onStateReplaced(state, world, pos, newState, moved);
+            super.onStateReplaced(state, world, pos, moved);
         }
     }
 

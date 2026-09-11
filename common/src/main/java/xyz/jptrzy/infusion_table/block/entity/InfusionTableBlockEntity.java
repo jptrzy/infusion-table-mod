@@ -139,7 +139,8 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
                 }
             } else if(entity.ticks < 36) {
                 Random random = new Random();
-                world.addParticle(ParticleTypes.ENCHANT, (double)pos.getX() + 0.5D, (double)pos.getY() + 1.0D, (double)pos.getZ() + 0.5D,
+                // TODO Check if renders property in multiplayer
+                world.addParticleClient(ParticleTypes.ENCHANT, (double)pos.getX() + 0.5D, (double)pos.getY() + 1.0D, (double)pos.getZ() + 0.5D,
                         (random.nextBoolean() ? -1 : 1) * random.nextFloat(),
                         1,
                         (random.nextBoolean() ? -1 : 1) * random.nextFloat());
@@ -249,20 +250,21 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
         // TODO Make it cleaner
         // Removes the error message
         if (!nbt.getCompound("Item").isEmpty()) {
-            this.item = ItemStack.fromNbt(registryLookup, nbt.getCompound("Item")).orElse(ItemStack.EMPTY);
+            this.item = ItemStack.fromNbt(registryLookup, nbt.get("Item")).orElse(ItemStack.EMPTY);
         } else {
             this.item = ItemStack.EMPTY;
         }
 
         if (!nbt.getCompound("Book").isEmpty()) {
-            this.book = ItemStack.fromNbt(registryLookup, nbt.getCompound("Book")).orElse(ItemStack.EMPTY);
+            this.book = ItemStack.fromNbt(registryLookup, nbt.get("Book")).orElse(ItemStack.EMPTY);
         } else {
             this.book = ItemStack.EMPTY;
         }
 
-        this.status = Status.valueOf(nbt.getString("Status"));
-        this.ticks = nbt.getFloat("Ticks");
-        this.bookOpenAngle = nbt.getFloat("Angle");
+        // TODO Check if default values don't introduce errors
+        this.status = Status.valueOf(nbt.getString("Status", "Passive"));
+        this.ticks = nbt.getFloat("Ticks", 0);
+        this.bookOpenAngle = nbt.getFloat("Angle", 0);
     }
 
     public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {

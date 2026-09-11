@@ -16,9 +16,9 @@ import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
@@ -37,21 +37,21 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
     }
 
     @Override
-    public void render(InfusionTableBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void render(InfusionTableBlockEntity entity, float tickProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
         if (entity.book.isEmpty()) return;
 
         matrices.push();
 
         matrices.translate(0.5, 0.75, 0.5);
-        matrices.translate(0.0D, (double)(0.1F + MathHelper.sin((entity.getWorld().getTime() + tickDelta) * 0.1F) * 0.01F), 0.0D);
+        matrices.translate(0.0D, (double)(0.1F + MathHelper.sin((entity.getWorld().getTime() + tickProgress) * 0.1F) * 0.01F), 0.0D);
 
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotation( -(entity.bookLastRot + InfusionTable.aroundRadial(entity.bookRot - entity.bookLastRot) * tickDelta) ));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotation( -(entity.bookLastRot + InfusionTable.aroundRadial(entity.bookRot - entity.bookLastRot) * tickProgress) ));
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(80.0F));
 
         VertexConsumer vertexConsumer = BOOK_TEXTURE.getVertexConsumer(vertexConsumers, RenderLayer::getEntitySolid);
         vertexConsumer = getBookGlintConsumer(vertexConsumers, vertexConsumer, entity.book.hasGlint());
 
-        book_model.setPageAngles(1, 0, 0, entity.bookLastOpenAngle + (entity.bookOpenAngle - entity.bookLastOpenAngle) * tickDelta );
+        book_model.setPageAngles(1, 0, 0, entity.bookLastOpenAngle + (entity.bookOpenAngle - entity.bookLastOpenAngle) * tickProgress );
         book_model.render(matrices, vertexConsumer, light, overlay);
 
         matrices.pop();
@@ -62,9 +62,9 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
             matrices.translate(0.5, 1.2, 0.5);
 
             // Rotate the item
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((entity.getWorld().getTime() + tickDelta) * 2));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((entity.getWorld().getTime() + tickProgress) * 2));
 
-            MinecraftClient.getInstance().getItemRenderer().renderItem(entity.item, ModelTransformationMode.GROUND, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
+            MinecraftClient.getInstance().getItemRenderer().renderItem(entity.item, ItemDisplayContext.GROUND, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
 
             matrices.pop();
         }
@@ -79,4 +79,6 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
     static {
         BOOK_TEXTURE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Identifier.of("entity/enchanting_table_book"));
     }
+
+
 }
