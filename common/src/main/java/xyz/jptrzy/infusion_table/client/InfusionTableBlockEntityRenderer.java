@@ -80,7 +80,7 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
         bookModel.getRootPart().traverse().forEach(part -> {
             queue.submitModelPart(
                     part, matrices,
-                    BOOK_TEXTURE.getRenderLayer(RenderLayer::getEntitySolid),
+                    BOOK_TEXTURE.getRenderLayer(RenderLayers::entitySolid),
                     state.lightmapCoordinates, OverlayTexture.DEFAULT_UV,
                     this.spriteHolder.getSprite(BOOK_TEXTURE), false, state.bookGlint);
         });
