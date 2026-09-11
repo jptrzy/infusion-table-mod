@@ -5,15 +5,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SidedInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -22,10 +18,13 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.storage.NbtWriteView;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -37,10 +36,8 @@ import net.minecraft.world.explosion.Explosion;
 import org.jetbrains.annotations.Nullable;
 import xyz.jptrzy.infusion_table.InfusionTable;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
-import java.util.Set;
 
 public class InfusionTableBlockEntity extends BlockEntity implements SidedInventory {
     public enum Status {
@@ -100,7 +97,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
                     entity.status = Status.Passive;
                     entity.bookOpenAngle = 0;
 
-                    entity.notifyListeners();
+                    entity.markDirty();
                 } else {
                     entity.bookOpenAngle -= .1;
                 }
@@ -110,7 +107,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
 
                     entity.bookOpenAngle = 1;
 
-                    entity.notifyListeners();
+                    entity.markDirty();
                 } else {
                     entity.bookOpenAngle += .1;
                 }
@@ -135,7 +132,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
 
                     entity.item.decrement(1);
 
-                    entity.notifyListeners();
+                    entity.markDirty();
                 }
             } else if(entity.ticks < 36) {
                 Random random = new Random();
@@ -168,7 +165,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
 
                     bookOpenAngle = 0;
 
-                    notifyListeners();
+                    markDirty();
                 }
             } else if (item.isEmpty() && hand_item.hasEnchantments() && book.isOf(Items.BOOK)) {
                 world.playSound(null, pos, SoundEvents.BLOCK_CHISELED_BOOKSHELF_INSERT_ENCHANTED, SoundCategory.BLOCKS, .8f, 1.2f);
@@ -181,7 +178,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
 
                 status = Status.Waiting;
 
-                notifyListeners();
+                markDirty();
             }
         } else if (status == Status.Waiting && bookOpenAngle >= 1 && hand_item.getItem() == Items.FLINT_AND_STEEL) {
             world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, .8f, .8f);
@@ -189,7 +186,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
 
             status = Status.Enchanting;
 
-            notifyListeners();
+            markDirty();
         }
 
         world.playSound(null, pos, SoundEvents.BLOCK_CRAFTER_FAIL, SoundCategory.BLOCKS, .8f, 2f);
@@ -216,7 +213,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
 
                 (item.isEmpty() ? book : item).decrement(1);
 
-                notifyListeners();
+                markDirty();
                 return;
             }
         }
@@ -228,49 +225,45 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
         onBreak(null, world, pos, null);
     }
 
-    // NBT
-
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
 
         if (!this.item.isEmpty()) {
-            nbt.put("Item", this.item.toNbt(registryLookup));
+            view.put("Item", ItemStack.CODEC, this.item);
         }
         if (!this.book.isEmpty()) {
-            nbt.put("Book", this.book.toNbt(registryLookup));
+            view.put("Book", ItemStack.CODEC, this.book);
         }
-        nbt.putString("Status", this.status.name());
-        nbt.putFloat("Ticks", this.ticks);
-        nbt.putFloat("Angle", this.bookOpenAngle);
+        view.putString("Status", this.status.name());
+        view.putFloat("Ticks", this.ticks);
+        view.putFloat("Angle", this.bookOpenAngle);
     }
 
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
+    protected void readData(ReadView view) {
+        super.readData(view);
 
-        // TODO Make it cleaner
         // Removes the error message
-        if (!nbt.getCompound("Item").isEmpty()) {
-            this.item = ItemStack.fromNbt(registryLookup, nbt.get("Item")).orElse(ItemStack.EMPTY);
-        } else {
-            this.item = ItemStack.EMPTY;
-        }
 
-        if (!nbt.getCompound("Book").isEmpty()) {
-            this.book = ItemStack.fromNbt(registryLookup, nbt.get("Book")).orElse(ItemStack.EMPTY);
-        } else {
-            this.book = ItemStack.EMPTY;
-        }
+        this.item = view.read("Item", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+        this.book = view.read("Book", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+//        if (!nbt.getCompound("Item").isEmpty()) {
 
         // TODO Check if default values don't introduce errors
-        this.status = Status.valueOf(nbt.getString("Status", "Passive"));
-        this.ticks = nbt.getFloat("Ticks", 0);
-        this.bookOpenAngle = nbt.getFloat("Angle", 0);
+        this.status = Status.valueOf(view.getString("Status", "Passive"));
+        this.ticks = view.getFloat("Ticks", 0);
+        this.bookOpenAngle = view.getFloat("Angle", 0);
     }
 
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        NbtCompound nbt = super.toInitialChunkDataNbt(registryLookup);
-        writeNbt(nbt, registryLookup);
-        return nbt;
+    @Override
+    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
+        // TODO I removed bellow super call cause is useless, but it might be important in the future
+        //NbtCompound baseNbt = super.toInitialChunkDataNbt(registries);
+
+        NbtWriteView view = NbtWriteView.create(ErrorReporter.EMPTY, registries);
+
+        this.writeData(view);
+
+        return view.getNbt();
     }
 
     @Nullable
@@ -279,12 +272,12 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
         return BlockEntityUpdateS2CPacket.create(this);
     }
 
-    public void notifyListeners() {
-        this.markDirty();
+    @Override
+    public void markDirty() {
+        super.markDirty();
 
-        if (world != null && !world.isClient()) {
-            world.updateListeners(getPos(), getCachedState(), getCachedState(), Block.NOTIFY_ALL);
-        }
+        assert world != null;
+        world.updateListeners(getPos(), getCachedState(), getCachedState(), Block.NOTIFY_ALL);
     }
 
     // Utils
@@ -292,14 +285,13 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
     public void cleanUp(World world){
         if (world.isClient()) return;
 
-
         this.status = Status.Passive;
         this.ticks = 0;
         this.bookOpenAngle = 0;
         this.item = ItemStack.EMPTY;
         this.book = ItemStack.EMPTY;
 
-        this.notifyListeners();
+        this.markDirty();
     }
 
     public static void dropStack(World world, BlockPos pos, ItemStack stack) {
@@ -390,7 +382,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
 
         getStack(slot).decrement(amount);
 
-        notifyListeners();
+        markDirty();
 
         return stack;
     }
@@ -413,7 +405,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
             InfusionTable.LOGGER.error("Asking for changing stack of unexpected slot {}", slot);
         }
 
-        notifyListeners();
+        markDirty();
     }
 
     @Override
@@ -425,5 +417,4 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
     public void clear() {
         InfusionTable.LOGGER.error("Clearing infusion table");
     }
-
 }
