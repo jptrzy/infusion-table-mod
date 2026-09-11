@@ -8,10 +8,9 @@ If forge/neoforge debug mode run bellow command. Restart Idea and pray that it w
 ```
 
 # Minecraft Commands
+```minecraft
+/give @s stick[enchantments={fire_aspect:2}]
 ```
-/give @s stick[enchantments={levels:{"minecraft:fire_aspect":2}}]
-```
-
-```
-/give @s stick[enchantments={levels:{"minecraft:sharpness":5,"minecraft:fire_aspect":2,"minecraft:unbreaking":3}}]
+```minecraft
+/give @s stick[enchantments={sharpness:5,fire_aspect:2,unbreaking:3}]
 ```
