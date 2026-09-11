@@ -79,11 +79,10 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
             } else {
                 entity.bookRotDir += 0.02F;
             }
-
-            entity.bookRot = InfusionTable.aroundRadial(entity.bookRot);
-            entity.bookRotDir = InfusionTable.aroundRadial(entity.bookRotDir);
+            entity.bookRot = wrapRadian(entity.bookRot);
+            entity.bookRotDir = wrapRadian(entity.bookRotDir);
             entity.bookRotForce = entity.bookRotDir - entity.bookRot;
-            entity.bookRotForce = InfusionTable.aroundRadial(entity.bookRotForce);
+            entity.bookRotForce = wrapRadian(entity.bookRotForce);
             entity.bookRot += entity.bookRotForce * 0.4F;
 
             entity.bookLastOpenAngle = entity.bookOpenAngle;
@@ -303,7 +302,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
     }
 
     private static void dropStack(World world, Supplier<ItemEntity> itemEntitySupplier, ItemStack stack) {
-        if (!world.isClient && !stack.isEmpty() && Objects.requireNonNull(world.getServer()).getGameRules().getBoolean(GameRules.DO_TILE_DROPS)) {
+        if (!world.isClient() && !stack.isEmpty() && Objects.requireNonNull(world.getServer()).getGameRules().getBoolean(GameRules.DO_TILE_DROPS)) {
             ItemEntity itemEntity = itemEntitySupplier.get();
             itemEntity.setToDefaultPickupDelay();
             world.spawnEntity(itemEntity);
@@ -416,5 +415,12 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
     @Override
     public void clear() {
         InfusionTable.LOGGER.error("Clearing infusion table");
+    }
+
+    public static float wrapRadian(float angle){
+        angle = angle % ((float) Math.TAU);
+        if (angle >= ((float) Math.PI)) angle -= ((float) Math.TAU);
+        if (angle < -((float) Math.PI)) angle += ((float) Math.TAU);
+        return angle;
     }
 }
