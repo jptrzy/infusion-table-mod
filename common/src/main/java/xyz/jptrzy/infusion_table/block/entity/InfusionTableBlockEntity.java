@@ -18,6 +18,7 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.storage.NbtWriteView;
@@ -30,9 +31,9 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
+import net.minecraft.world.rule.GameRules;
 import org.jetbrains.annotations.Nullable;
 import xyz.jptrzy.infusion_table.InfusionTable;
 
@@ -302,7 +303,8 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
     }
 
     private static void dropStack(World world, Supplier<ItemEntity> itemEntitySupplier, ItemStack stack) {
-        if (!world.isClient() && !stack.isEmpty() && Objects.requireNonNull(world.getServer()).getGameRules().getBoolean(GameRules.DO_TILE_DROPS)) {
+        // !world.isClient()
+        if (world instanceof ServerWorld serverWorld && !stack.isEmpty() && serverWorld.getGameRules().getValue(GameRules.DO_TILE_DROPS)) {
             ItemEntity itemEntity = itemEntitySupplier.get();
             itemEntity.setToDefaultPickupDelay();
             world.spawnEntity(itemEntity);
