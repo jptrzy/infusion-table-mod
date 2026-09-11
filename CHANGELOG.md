@@ -1,3 +1,6 @@
+# 1.2.2+1.21.8
+* Fix infinitely consumes item from a hopper, when enchanted book was inside
+
 # 1.2.2+1.21
 * Crafting recipe unlocks after player picks up crying obsidian
 * Fix book glint not displaying on fabulous graphics setting
