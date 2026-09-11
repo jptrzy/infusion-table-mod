@@ -345,7 +345,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements SidedInvent
             if (slot == 0) {
                 return book.isEmpty() && stack.isOf(Items.BOOK);
             } else if (slot == 1) {
-                return !book.isEmpty() && item.isEmpty() && stack.hasEnchantments();
+                return !book.isEmpty() && book.isOf(Items.BOOK) && item.isEmpty() && stack.hasEnchantments();
             } else {
                 InfusionTable.LOGGER.error("Asking for insertion of unexpected slot {}", slot);
 
