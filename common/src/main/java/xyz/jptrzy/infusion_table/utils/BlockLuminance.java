@@ -1,6 +1,6 @@
 package xyz.jptrzy.infusion_table.utils;
 
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.ToIntFunction;
 

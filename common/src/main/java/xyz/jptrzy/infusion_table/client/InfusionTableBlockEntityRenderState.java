@@ -1,8 +1,8 @@
 package xyz.jptrzy.infusion_table.client;
 
-import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
-import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.world.item.ItemStack;
 
 public class InfusionTableBlockEntityRenderState extends BlockEntityRenderState {
     public boolean showBook = false;
@@ -15,5 +15,5 @@ public class InfusionTableBlockEntityRenderState extends BlockEntityRenderState 
     public ItemStack item = ItemStack.EMPTY;
     public double itemAngle = 0.0;
 
-    ItemRenderState itemRenderState = new ItemRenderState();
+    ItemStackRenderState itemStackRenderState = new ItemStackRenderState();
 }

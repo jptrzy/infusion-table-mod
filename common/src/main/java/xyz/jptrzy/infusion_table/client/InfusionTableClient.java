@@ -1,8 +1,7 @@
 package xyz.jptrzy.infusion_table.client;
 
+
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import xyz.jptrzy.infusion_table.InfusionTable;
 
 public class InfusionTableClient {

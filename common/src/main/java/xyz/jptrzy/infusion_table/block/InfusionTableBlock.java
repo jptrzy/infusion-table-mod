@@ -1,102 +1,81 @@
 package xyz.jptrzy.infusion_table.block;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jspecify.annotations.Nullable;
 import xyz.jptrzy.infusion_table.InfusionTable;
 import xyz.jptrzy.infusion_table.block.entity.InfusionTableBlockEntity;
 
-public class InfusionTableBlock extends BlockWithEntity {
-    public static final MapCodec<InfusionTableBlock> CODEC = createCodec(InfusionTableBlock::new);
+public class InfusionTableBlock extends BaseEntityBlock {
+    public static final MapCodec<InfusionTableBlock> CODEC = simpleCodec(InfusionTableBlock::new);
+    public final static VoxelShape COLLISION_SHAPE = Block.box(0, 0, 0, 16, 12, 16);
 
-    public final static VoxelShape COLLISION_SHAPE;
-    public final static BlockSoundGroup soundGroup;
-
-    public InfusionTableBlock(Settings settings) {
+    public InfusionTableBlock(Properties settings) {
         super(settings);
     }
 
-    protected MapCodec<? extends BlockWithEntity> getCodec() {
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
         return CODEC;
     }
 
     @Override
-    public BlockSoundGroup getSoundGroup(BlockState state) {
-        return this.soundGroup;
+    public BlockEntity newBlockEntity(BlockPos worldPosition, BlockState blockState) {
+        return new InfusionTableBlockEntity(worldPosition, blockState);
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context) {
+    protected SoundType getSoundType(BlockState state) {
+        return SoundType.DEEPSLATE_TILES;
+    }
+
+    @Override
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return COLLISION_SHAPE;
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
-
-    static{
-        COLLISION_SHAPE = Block.createCuboidShape(0, 0, 0, 16, 12, 16);
-        soundGroup = BlockSoundGroup.DEEPSLATE_TILES;
-    }
-
-    // Block Entity
-
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new InfusionTableBlockEntity(pos, state);
-    }
-
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, InfusionTable.INFUSION_TABLE_BLOCK_ENTITY.get(), InfusionTableBlockEntity::tick);
-    }
-
-    @Nullable
-    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> checkType(BlockEntityType<A> givenType, BlockEntityType<E> expectedType, BlockEntityTicker<? super E> ticker) {
-        return expectedType == givenType ? (BlockEntityTicker<A>) ticker : null;
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
     }
 
     @Override
+    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> type) {
+        return createTickerHelper(type, InfusionTable.INFUSION_TABLE_BLOCK_ENTITY.get(), InfusionTableBlockEntity::tick);
+    }
 
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if(world.getBlockEntity(pos) != null) {
-            return ((InfusionTableBlockEntity) world.getBlockEntity(pos)).onUse(state, world, pos, player, player.getActiveHand(), hit);
+    @Override
+    protected InteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (level.getBlockEntity(pos) instanceof InfusionTableBlockEntity entity) {
+            return entity.useItem(level, pos, player.getItemInHand(hand));
         }
-        return ActionResult.PASS;
+
+        return super.useItemOn(itemStack, state, level, pos, player, hand, hitResult);
     }
 
     @Override
-    public void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
-    //public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-       // TODO check if works after changes with tnt
-        var newState = world.getBlockState(pos);
-        if (!state.isOf(newState.getBlock())) {
-            if(world.getBlockEntity(pos) != null) {
-                ((InfusionTableBlockEntity) world.getBlockEntity(pos)).onBreak(state, world, pos, null);
-            }
-            super.onStateReplaced(state, world, pos, moved);
+    protected void attack(BlockState state, Level level, BlockPos pos, Player player) {
+        if (level.getBlockEntity(pos) instanceof InfusionTableBlockEntity entity) {
+            entity.attack(level, pos);
         }
-    }
 
-    @Override public void onBlockBreakStart(BlockState state, World world, BlockPos pos, PlayerEntity player) {
-        if(world.getBlockEntity(pos) != null) {
-            ((InfusionTableBlockEntity) world.getBlockEntity(pos)).onBreak(state, world, pos, player);
-        }
+        super.attack(state, level, pos, player);
     }
 }

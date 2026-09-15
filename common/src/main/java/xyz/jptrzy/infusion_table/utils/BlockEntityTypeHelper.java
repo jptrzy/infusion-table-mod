@@ -1,9 +1,9 @@
 package xyz.jptrzy.infusion_table.utils;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.minecraft.block.Block;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class BlockEntityTypeHelper {
     @ExpectPlatform
