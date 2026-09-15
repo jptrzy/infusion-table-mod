@@ -1,36 +1,36 @@
 package xyz.jptrzy.infusion_table.client;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.ItemModelManager;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.model.BookModel;
-import net.minecraft.client.render.entity.model.EntityModelLayers;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.texture.SpriteHolder;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.object.book.BookModel;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.sprite.SpriteGetter;
+import net.minecraft.client.resources.model.sprite.SpriteId;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 import xyz.jptrzy.infusion_table.InfusionTable;
 import xyz.jptrzy.infusion_table.block.entity.InfusionTableBlockEntity;
 
 public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<InfusionTableBlockEntity, InfusionTableBlockEntityRenderState> {
-    public static final SpriteIdentifier BOOK_TEXTURE;
-    private final SpriteHolder spriteHolder;
+    public static final SpriteId BOOK_TEXTURE;
+    private final SpriteGetter sprites;
     private final BookModel bookModel;
 
-    public InfusionTableBlockEntityRenderer(BlockEntityRendererFactory.Context ctx) {
-        this.spriteHolder = ctx.spriteHolder();
-        this.bookModel = new BookModel(ctx.getLayerModelPart(EntityModelLayers.BOOK));
+    public InfusionTableBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {
+        this.sprites = ctx.sprites();
+        this.bookModel = new BookModel(ctx.bakeLayer(ModelLayers.BOOK));
     }
 
     @Override
@@ -39,89 +39,90 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
     }
 
     @Override
-    public void updateRenderState(InfusionTableBlockEntity blockEntity, InfusionTableBlockEntityRenderState state, float tickProgress, Vec3d cameraPos, @Nullable ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay) {
-        BlockEntityRenderer.super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+    public void extractRenderState(InfusionTableBlockEntity blockEntity, InfusionTableBlockEntityRenderState state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
+        BlockEntityRenderer.super.extractRenderState(blockEntity, state, partialTicks, cameraPosition, breakProgress);
 
-        state.bookGlint = blockEntity.book.hasGlint();
+        state.bookGlint = blockEntity.book.hasFoil();
         state.showBook = blockEntity.book.isEmpty();
-        state.bookHeight = MathHelper.sin((blockEntity.getWorld().getTime() + tickProgress) * 0.1F);
-        // TODO use lerp
-        state.bookAngle = MathHelper.lerpAngleRadians(tickProgress, blockEntity.bookLastRot, blockEntity.bookRot);
-        state.bookOpenAngle = blockEntity.bookLastOpenAngle + (blockEntity.bookOpenAngle - blockEntity.bookLastOpenAngle) * tickProgress;
+        state.bookHeight = Mth.sin((blockEntity.getLevel().getGameTime() + partialTicks) * 0.1F);
+        state.bookAngle = Mth.rotLerpRad(partialTicks, blockEntity.bookLastRot, blockEntity.bookRot);
+        state.bookOpenAngle = Mth.lerp(partialTicks, blockEntity.bookLastOpenAngle, blockEntity.bookOpenAngle);
 
-        ItemModelManager modelManager = MinecraftClient.getInstance().getItemModelManager();
-        modelManager.clearAndUpdate(
-                state.itemRenderState,
+        ItemModelResolver resolver = Minecraft.getInstance().getItemModelResolver();
+
+        resolver.appendItemLayers(
+                state.itemStackRenderState,
                 blockEntity.item,
                 ItemDisplayContext.GROUND,
-                blockEntity.getWorld(),
+                blockEntity.getLevel(),
                 null,
                 0
         );
 
         state.item = blockEntity.item;
-        state.itemAngle = (blockEntity.getWorld().getTime() + tickProgress) * 2;
+        state.itemAngle = (blockEntity.getLevel().getGameTime() + partialTicks) * 2;
     }
 
     @Override
-    public void render(InfusionTableBlockEntityRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState) {
+    public void submit(InfusionTableBlockEntityRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
         if (state.showBook) return;
 
-        matrices.push();
+        poseStack.pushPose();
 
-        matrices.translate(0.5, 0.75, 0.5);
-        matrices.translate(0.0D, (double)(0.1F + state.bookHeight * 0.01F), 0.0D);
+        poseStack.translate(0.5, 0.75, 0.5);
+        poseStack.translate(0.0D, (double)(0.1F + state.bookHeight * 0.01F), 0.0D);
 
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotation( (float) -state.bookAngle ));
-        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(80.0F));
+        poseStack.mulPose(Axis.YP.rotation((float) -state.bookAngle));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(80.0F));
 
-        BookModel.BookModelState bookModelState = new BookModel.BookModelState(1, 0, 0, (float) state.bookOpenAngle);
+        BookModel.State bookModelState = BookModel.State.forAnimation(1, 0, 0, (float) state.bookOpenAngle);
 
-        queue.submitModel(
+        submitNodeCollector.submitModel(
                 this.bookModel,
                 bookModelState,
-                matrices,
-                BOOK_TEXTURE.getRenderLayer(RenderLayer::getEntitySolid),
-                state.lightmapCoordinates,
-                OverlayTexture.DEFAULT_UV,
+                poseStack,
+                BOOK_TEXTURE.renderType(this.bookModel.renderType()),
+                state.lightCoords,
+                OverlayTexture.NO_OVERLAY,
                 -1,
-                spriteHolder.getSprite(BOOK_TEXTURE),
+                sprites.get(BOOK_TEXTURE),
                 0,
-                state.crumblingOverlay
+                state.breakProgress
         );
         if (state.bookGlint) {
-            queue.submitModel(
+            submitNodeCollector.submitModel(
                     this.bookModel,
                     bookModelState,
-                    matrices,
-                    RenderLayer.getEntityGlint(),
-                    state.lightmapCoordinates,
-                    OverlayTexture.DEFAULT_UV,
+                    poseStack,
+                    RenderTypes.entityGlint(),
+                    state.lightCoords,
+                    OverlayTexture.NO_OVERLAY,
                     -1,
-                    spriteHolder.getSprite(BOOK_TEXTURE),
+                    sprites.get(BOOK_TEXTURE),
                     0,
-                    state.crumblingOverlay
+                    state.breakProgress
             );
         }
 
-        matrices.pop();
+        poseStack.popPose();
 
         if(state.bookOpenAngle >= 1 && !state.item.isEmpty()){
-            matrices.push();
+            poseStack.pushPose();
 
-            matrices.translate(0.5, 1.2, 0.5);
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float) state.itemAngle));
+            poseStack.translate(0.5, 1.2, 0.5);
+            poseStack.mulPose(Axis.YP.rotationDegrees((float) state.itemAngle));
 
-            state.itemRenderState.render(
-                    matrices, queue,
-                    state.lightmapCoordinates, OverlayTexture.DEFAULT_UV,
+
+            state.itemStackRenderState.submit(
+                    poseStack, submitNodeCollector,
+                    state.lightCoords, OverlayTexture.NO_OVERLAY,
                     0);
 
-            matrices.pop();
+            poseStack.popPose();
         }
     }
 
     static {
-        BOOK_TEXTURE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Identifier.of("entity/enchanting_table_book"));
+        BOOK_TEXTURE = Sheets.BLOCK_ENTITIES_MAPPER.defaultNamespaceApply("enchantment/enchanting_table_book");
     }
 }
