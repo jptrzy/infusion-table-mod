@@ -1,3 +1,6 @@
+# 1.2.3+26.2
+* Fix book model rendering incorrectly, when two blocks were present
+
 # 1.2.2+1.21.8
 * Fix infinitely consumes item from a hopper, when enchanted book was inside
 
