@@ -15,7 +15,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.WorldlyContainer;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -286,7 +286,7 @@ public class InfusionTableBlockEntity extends BlockEntity implements WorldlyCont
     }
 
     public static void dropStack(Level level, BlockPos pos, ItemStack stack) {
-        float f = EntityType.ITEM.getHeight() / 2.0F;
+        float f = EntityTypes.ITEM.getHeight() / 2.0F;
         double d = (float)pos.getX() + 0.5F;
         double e = (double)((float)pos.getY() + 1F) - (double)f;
         double g = ( float)pos.getZ() + 0.5F;
