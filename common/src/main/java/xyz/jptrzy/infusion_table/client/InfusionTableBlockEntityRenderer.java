@@ -76,14 +76,33 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(80.0F));
 
         BookModel.BookModelState bookModelState = new BookModel.BookModelState(1, 0, 0, (float) state.bookOpenAngle);
-        bookModel.setAngles(bookModelState);
-        bookModel.getRootPart().traverse().forEach(part -> {
-            queue.submitModelPart(
-                    part, matrices,
-                    BOOK_TEXTURE.getRenderLayer(RenderLayer::getEntitySolid),
-                    state.lightmapCoordinates, OverlayTexture.DEFAULT_UV,
-                    this.spriteHolder.getSprite(BOOK_TEXTURE), false, state.bookGlint);
-        });
+
+        queue.submitModel(
+                this.bookModel,
+                bookModelState,
+                matrices,
+                BOOK_TEXTURE.getRenderLayer(RenderLayer::getEntitySolid),
+                state.lightmapCoordinates,
+                OverlayTexture.DEFAULT_UV,
+                -1,
+                spriteHolder.getSprite(BOOK_TEXTURE),
+                0,
+                state.crumblingOverlay
+        );
+        if (state.bookGlint) {
+            queue.submitModel(
+                    this.bookModel,
+                    bookModelState,
+                    matrices,
+                    RenderLayer.getEntityGlint(),
+                    state.lightmapCoordinates,
+                    OverlayTexture.DEFAULT_UV,
+                    -1,
+                    spriteHolder.getSprite(BOOK_TEXTURE),
+                    0,
+                    state.crumblingOverlay
+            );
+        }
 
         matrices.pop();
 
