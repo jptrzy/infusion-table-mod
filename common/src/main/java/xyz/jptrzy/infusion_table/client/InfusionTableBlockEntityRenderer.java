@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.UvMapping;
 import net.minecraft.client.resources.model.sprite.SpriteGetter;
 import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.util.Mth;
@@ -76,8 +77,8 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
         poseStack.translate(0.5, 0.75, 0.5);
         poseStack.translate(0.0D, (double)(0.1F + state.bookHeight * 0.01F), 0.0D);
 
-        poseStack.mulPose(Axis.YP.rotation((float) -state.bookAngle));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(80.0F));
+        poseStack.rotate(Axis.YP, (float) -state.bookAngle);
+        poseStack.rotateDegrees(Axis.ZP,80.0F);
 
         BookModel.State bookModelState = BookModel.State.forAnimation(1, 0, 0, (float) state.bookOpenAngle);
 
@@ -90,21 +91,24 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
                 OverlayTexture.NO_OVERLAY,
                 -1,
                 sprites.get(BOOK_TEXTURE),
-                0,
-                state.breakProgress
+                0
         );
+
+        if (state.breakProgress != null) {
+            submitNodeCollector.order(1).submitCrumblingOverlay(this.bookModel, bookModelState, poseStack, BOOK_TEXTURE.renderType(this.bookModel.renderType()), state.lightCoords, OverlayTexture.NO_OVERLAY, -1, state.breakProgress);
+        }
+
         if (state.bookGlint) {
-            submitNodeCollector.submitModel(
+            submitNodeCollector.order(2).submitModel(
                     this.bookModel,
                     bookModelState,
                     poseStack,
-                    RenderTypes.entityGlint(),
+                    BOOK_TEXTURE.renderType(RenderTypes::entitySolidGlint),
                     state.lightCoords,
                     OverlayTexture.NO_OVERLAY,
                     -1,
                     sprites.get(BOOK_TEXTURE),
-                    0,
-                    state.breakProgress
+                    0
             );
         }
 
@@ -114,7 +118,7 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
             poseStack.pushPose();
 
             poseStack.translate(0.5, 1.2, 0.5);
-            poseStack.mulPose(Axis.YP.rotationDegrees((float) state.itemAngle));
+            poseStack.rotateDegrees(Axis.YP, (float) state.itemAngle);
 
 
             state.itemStackRenderState.submit(

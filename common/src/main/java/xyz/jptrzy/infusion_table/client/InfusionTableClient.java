@@ -6,6 +6,8 @@ import xyz.jptrzy.infusion_table.InfusionTable;
 
 public class InfusionTableClient {
     public void init() {
-        BlockEntityRendererRegistry.register(InfusionTable.INFUSION_TABLE_BLOCK_ENTITY.get(), InfusionTableBlockEntityRenderer::new);
+        InfusionTable.INFUSION_TABLE_BLOCK_ENTITY.listen(entity -> {
+            BlockEntityRendererRegistry.register(entity, InfusionTableBlockEntityRenderer::new);
+        });
     }
 }

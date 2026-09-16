@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -24,16 +25,10 @@ import xyz.jptrzy.infusion_table.InfusionTable;
 import xyz.jptrzy.infusion_table.block.entity.InfusionTableBlockEntity;
 
 public class InfusionTableBlock extends BaseEntityBlock {
-    public static final MapCodec<InfusionTableBlock> CODEC = simpleCodec(InfusionTableBlock::new);
     public final static VoxelShape COLLISION_SHAPE = Block.box(0, 0, 0, 16, 12, 16);
 
     public InfusionTableBlock(Properties settings) {
         super(settings);
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
     }
 
     @Override

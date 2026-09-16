@@ -4,7 +4,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "infusion_table:infusion_table"
+        "recipes": "infusion_table:infusion_table"
       }
     },
     "obtained_crying_obsidian": {
