@@ -9,7 +9,7 @@ version = "${version}"
 displayName = "${mod_name}"
 #updateJSONURL="http://myurl.me/" #optional
 #displayURL="http://example.com/" #optional
-logoFile = "icon.png"
+iconFile = "icon.png"
 authors="${mod_authors}"
 description = '''${mod_description}'''
 
