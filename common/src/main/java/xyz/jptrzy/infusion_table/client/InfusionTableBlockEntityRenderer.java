@@ -4,16 +4,20 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.object.book.BookModel;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollection;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.SpriteGetter;
 import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.util.Mth;
@@ -76,14 +80,33 @@ public class InfusionTableBlockEntityRenderer implements BlockEntityRenderer<Inf
         poseStack.mulPose(Axis.ZP.rotationDegrees(80.0F));
 
         BookModel.State bookModelState = BookModel.State.forAnimation(1, 0, 0, (float) state.bookOpenAngle);
-        bookModel.setupAnim(bookModelState);
-        bookModel.root().getAllParts().forEach(part -> {
-            submitNodeCollector.submitModelPart(
-                    part, poseStack,
-                    BOOK_TEXTURE.renderType(RenderTypes::entitySolid),
-                    state.lightCoords, OverlayTexture.NO_OVERLAY,
-                    this.sprites.get(BOOK_TEXTURE), false, state.bookGlint);
-        });
+
+        submitNodeCollector.submitModel(
+                this.bookModel,
+                bookModelState,
+                poseStack,
+                BOOK_TEXTURE.renderType(this.bookModel.renderType()),
+                state.lightCoords,
+                OverlayTexture.NO_OVERLAY,
+                -1,
+                sprites.get(BOOK_TEXTURE),
+                0,
+                state.breakProgress
+        );
+        if (state.bookGlint) {
+            submitNodeCollector.submitModel(
+                    this.bookModel,
+                    bookModelState,
+                    poseStack,
+                    RenderTypes.entityGlint(),
+                    state.lightCoords,
+                    OverlayTexture.NO_OVERLAY,
+                    -1,
+                    sprites.get(BOOK_TEXTURE),
+                    0,
+                    state.breakProgress
+            );
+        }
 
         poseStack.popPose();
 
